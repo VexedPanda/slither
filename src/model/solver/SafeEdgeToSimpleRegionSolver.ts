@@ -12,10 +12,9 @@ import { GeneralSimpleRegionAction } from '../data/simple-region/GeneralSimpleRe
 import { TSimpleRegion, TSimpleRegionData } from '../data/simple-region/TSimpleRegionData.ts';
 import { TSolver } from './TSolver.ts';
 
-import { dotRandom } from 'phet-lib/dot';
+import { dotRandom } from 'scenerystack/dot';
 
 import _ from '../../workarounds/_.ts';
-
 
 // Oops, because on app restart, region IDs are persistent
 const getSimpleRegionGlobalId = (): number => dotRandom.nextInt(Number.MAX_SAFE_INTEGER);

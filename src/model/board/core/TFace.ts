@@ -2,7 +2,7 @@ import { TEdge } from './TEdge.ts';
 import { THalfEdge } from './THalfEdge.ts';
 import { TVertex } from './TVertex.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 export interface TFace {
   logicalCoordinates: Vector2;

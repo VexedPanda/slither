@@ -1,6 +1,6 @@
 import PanDragMode, { panDragModeProperty } from '../PanDragMode.ts';
 
-import { FireListener, Node, PressListenerEvent } from 'phet-lib/scenery';
+import { FireListener, Node, PressListenerEvent } from 'scenerystack/scenery';
 
 export const hookPuzzleBackgroundListeners = (
   node: Node,

@@ -8,7 +8,7 @@ import { PatternBoardSolver } from '../solve/PatternBoardSolver.ts';
 import { RichSolution } from '../solve/RichSolution.ts';
 import { BinaryFeatureMap } from './BinaryFeatureMap.ts';
 
-import { optionize3 } from 'phet-lib/phet-core';
+import { optionize3 } from 'scenerystack/phet-core';
 
 export type GetFeatureImpliedRulesOptions = {
   logModulo?: number;

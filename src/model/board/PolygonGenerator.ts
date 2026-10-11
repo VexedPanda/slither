@@ -1,4 +1,4 @@
-import { Range, Vector2 } from 'phet-lib/dot';
+import { Range, Vector2 } from 'scenerystack/dot';
 
 export type PolygonGeneratorParameter = {
   label: string;

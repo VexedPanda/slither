@@ -26,8 +26,8 @@ import {
   LayoutVertex,
 } from './layout.ts';
 
-import { Vector2 } from 'phet-lib/dot';
-import { arrayRemove } from 'phet-lib/phet-core';
+import { Vector2 } from 'scenerystack/dot';
+import { arrayRemove } from 'scenerystack/phet-core';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

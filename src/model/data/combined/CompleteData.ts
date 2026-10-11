@@ -27,8 +27,8 @@ import { VertexState } from '../vertex-state/VertexState.ts';
 import { CompleteDelta } from './CompleteDelta.ts';
 import { TCompleteData, TSerializedCompleteData, serializeCompleteData } from './TCompleteData.ts';
 
-import { TEmitter, TinyEmitter } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
+import { TEmitter, TinyEmitter } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

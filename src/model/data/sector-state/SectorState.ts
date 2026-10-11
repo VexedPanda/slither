@@ -1,4 +1,4 @@
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

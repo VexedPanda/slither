@@ -1,4 +1,5 @@
-import { AlignBox, Display, GridBox, Node, Rectangle, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, Display, GridBox, Node, Rectangle, VBox } from 'scenerystack/scenery';
 
 import { planarPatternMaps } from '../model/pattern/pattern-board/planar-map/planarPatternMaps.ts';
 import { PatternRule } from '../model/pattern/pattern-rule/PatternRule.ts';
@@ -7,8 +8,7 @@ import { PatternRuleNode } from '../view/pattern/PatternRuleNode.ts';
 
 import assert, { assertEnabled } from '../workarounds/assert.ts';
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

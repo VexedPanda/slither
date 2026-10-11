@@ -2,7 +2,7 @@ import { PolygonGenerator } from './PolygonGenerator.ts';
 import { PeriodicBoardTiling } from './core/PeriodicBoardTiling.ts';
 import { getCentroid } from './core/createBoardDescriptor.ts';
 
-import { Bounds2, Range, Vector2 } from 'phet-lib/dot';
+import { Bounds2, Range, Vector2 } from 'scenerystack/dot';
 
 import _ from '../../workarounds/_.ts';
 

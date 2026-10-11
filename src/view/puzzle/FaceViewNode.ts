@@ -1,8 +1,8 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { Multilink, TReadOnlyProperty } from 'phet-lib/axon';
-import { combineOptions } from 'phet-lib/phet-core';
-import { Node, RichText, RichTextOptions, TColor } from 'phet-lib/scenery';
+import { Multilink, TReadOnlyProperty } from 'scenerystack/axon';
+import { combineOptions } from 'scenerystack/phet-core';
+import { Node, RichText, RichTextOptions, TColor } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TState } from '../../model/data/core/TState.ts';

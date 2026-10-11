@@ -1,4 +1,4 @@
-import { Shape } from 'phet-lib/kite';
+import { Shape } from 'scenerystack/kite';
 
 export interface PenroseTiling {
   name: string;

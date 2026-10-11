@@ -5,7 +5,7 @@ import { serializeEdge } from '../../board/core/serializeEdge.ts';
 import { TSerializedState } from '../core/TSerializedState.ts';
 import EdgeState from './EdgeState.ts';
 
-import { TEmitter } from 'phet-lib/axon';
+import { TEmitter } from 'scenerystack/axon';
 
 export interface TEdgeStateData {
   getEdgeState(edge: TEdge): EdgeState;

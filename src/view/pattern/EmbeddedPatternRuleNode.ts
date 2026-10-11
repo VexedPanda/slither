@@ -4,12 +4,12 @@ import PuzzleNode from '../puzzle/PuzzleNode.ts';
 import { TPuzzleStyle } from '../puzzle/TPuzzleStyle.ts';
 import { currentPuzzleStyle } from '../puzzle/puzzleStyles.ts';
 
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { optionize } from 'phet-lib/phet-core';
-import { HBox, Node, NodeOptions, Text } from 'phet-lib/scenery';
-import { ArrowNode } from 'phet-lib/scenery-phet';
-import { Panel } from 'phet-lib/sun';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { optionize } from 'scenerystack/phet-core';
+import { HBox, Node, NodeOptions, Text } from 'scenerystack/scenery';
+import { ArrowNode } from 'scenerystack/scenery-phet';
+import { Panel } from 'scenerystack/sun';
 
 import { TFace } from '../../model/board/core/TFace.ts';
 import { DisplayEmbedding } from '../../model/pattern/embedding/DisplayEmbedding.ts';

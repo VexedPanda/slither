@@ -8,7 +8,7 @@ import {
   rescaleProtoDescriptorMinimum,
 } from './createBoardDescriptor.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import { getCoordinateClusteredMap } from '../../../util/getCoordinateClusteredMap.ts';
 

@@ -57,8 +57,8 @@ import {
   vertexStatePuzzleStyle,
 } from './puzzle/puzzleStyles.ts';
 
-import { BooleanProperty, DerivedProperty, MappedProperty, Property } from 'phet-lib/axon';
-import { GridBox, HBox, Node, Rectangle, Text, VBox } from 'phet-lib/scenery';
+import { BooleanProperty, DerivedProperty, MappedProperty, Property } from 'scenerystack/axon';
+import { GridBox, HBox, Node, Rectangle, Text, VBox } from 'scenerystack/scenery';
 
 import SlitherQueryParameters from '../SlitherQueryParameters.ts';
 
@@ -365,32 +365,32 @@ export class SettingsNode extends PopupNode {
       {
         value: 1,
         createNode: () => new UIText('Show All'),
-        labelContent: 'Show All',
+        options: { accessibleName: 'Show All' },
       },
       {
         value: 2,
         createNode: () => new UIText('2+'),
-        labelContent: '2+',
+        options: { accessibleName: '2+' },
       },
       {
         value: 3,
         createNode: () => new UIText('3+'),
-        labelContent: '3+',
+        options: { accessibleName: '3+' },
       },
       {
         value: 5,
         createNode: () => new UIText('5+'),
-        labelContent: '5+',
+        options: { accessibleName: '5+' },
       },
       {
         value: 10,
         createNode: () => new UIText('10+'),
-        labelContent: '10+',
+        options: { accessibleName: '10+' },
       },
       {
         value: Number.POSITIVE_INFINITY,
         createNode: () => new UIText('Only Outside'),
-        labelContent: 'Only Outside',
+        options: { accessibleName: 'Only Outside' },
       },
     ]);
 
@@ -473,52 +473,52 @@ export class SettingsNode extends PopupNode {
       {
         value: classicPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.classicIcon, 'Classic'),
-        labelContent: 'Classic',
+        options: { accessibleName: 'Classic' },
       },
       {
         value: basicLinesPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.basicLinesIcon, 'Lines'),
-        labelContent: 'Lines',
+        options: { accessibleName: 'Lines' },
       },
       {
         value: basicFaceColoringPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.basicFaceColoringIcon, 'Lines and Colors'),
-        labelContent: 'Lines and Colors',
+        options: { accessibleName: 'Lines and Colors' },
       },
       {
         value: pureFaceColorPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.pureFaceColoringIcon, 'Colors'),
-        labelContent: 'Colors',
+        options: { accessibleName: 'Colors' },
       },
       {
         value: basicSectorsPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.basicSectorsIcon, 'Sectors'),
-        labelContent: 'Sectors',
         options: {
+          accessibleName: 'Sectors',
           visibleProperty: showSectorViewModesProperty,
         },
       },
       {
         value: sectorsWithColorsPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.sectorsWithColorsIcon, 'Sectors and Colors'),
-        labelContent: 'Sectors and Colors',
         options: {
+          accessibleName: 'Sectors and Colors',
           visibleProperty: showSectorViewModesProperty,
         },
       },
       {
         value: vertexStatePuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.vertexStateIcon, 'Vertex State'),
-        labelContent: 'Vertex State',
         options: {
+          accessibleName: 'Vertex State',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },
       {
         value: faceStatePuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.faceStateIcon, 'Face State'),
-        labelContent: 'Face State',
         options: {
+          accessibleName: 'Face State',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },
@@ -526,8 +526,8 @@ export class SettingsNode extends PopupNode {
         // TODO: only show this when custom is enabled!!!
         value: customPuzzleStyle,
         createNode: () => getViewLabel(viewStyleIcons.customIcon, 'Custom'),
-        labelContent: 'Custom',
         options: {
+          accessibleName: 'Custom',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },

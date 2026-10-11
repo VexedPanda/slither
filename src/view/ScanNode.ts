@@ -4,7 +4,7 @@ import { UIText } from './UIText.ts';
 import { ViewContext } from './ViewContext.ts';
 import PuzzleNode from './puzzle/PuzzleNode.ts';
 
-import { HBox, Image, Node, Path, Rectangle, Text, VBox } from 'phet-lib/scenery';
+import { HBox, Image, Node, Path, Rectangle, Text, VBox } from 'scenerystack/scenery';
 
 import { TEdge } from '../model/board/core/TEdge.ts';
 import { TStructure } from '../model/board/core/TStructure.ts';
@@ -18,7 +18,6 @@ import { Contour } from '../scan/Contour.ts';
 import { ScanOptions } from '../scan/scanURL.ts';
 
 import assert, { assertEnabled } from '../workarounds/assert.ts';
-
 
 // TODO: culori?
 const undecidedStroke = '#444';

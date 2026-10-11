@@ -1,4 +1,4 @@
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 export default class FeatureCompatibility extends EnumerationValue {
   // The input feature set is impossible to satisfy, given the target feature set or derivations (a rule with this as the input will never be applied)

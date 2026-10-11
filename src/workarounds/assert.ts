@@ -1,5 +1,5 @@
-// @ts-expect-error
-export default (predicate, ...messages) => window.assert(predicate, ...messages);
+import { assert } from 'scenerystack/assert';
 
-// @ts-expect-error
-export const assertEnabled = (): boolean => !!window.assert;
+export default (predicate: unknown, ...messages: unknown[]): void => assert!(predicate, ...messages);
+
+export const assertEnabled = (): boolean => !!assert;

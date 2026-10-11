@@ -1,6 +1,6 @@
-import { Shape } from 'phet-lib/kite';
-import { combineOptions } from 'phet-lib/phet-core';
-import { Path, PathOptions } from 'phet-lib/scenery';
+import { Shape } from 'scenerystack/kite';
+import { combineOptions } from 'scenerystack/phet-core';
+import { Path, PathOptions } from 'scenerystack/scenery';
 
 // From https://github.com/onface/font-awesome (under SIL OFL 1.1 license) by Dave Gandy
 // SVG in https://github.com/jalmeydaa/portfolio/blob/master/fonts/fontawesome-webfont.svg%3Fv%3D4.7.0

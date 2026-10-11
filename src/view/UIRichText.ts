@@ -1,8 +1,8 @@
 import { currentTheme, uiFont } from './Theme.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
-import { EmptySelfOptions, optionize } from 'phet-lib/phet-core';
-import { RichText, RichTextOptions } from 'phet-lib/scenery';
+import { TReadOnlyProperty } from 'scenerystack/axon';
+import { EmptySelfOptions, optionize } from 'scenerystack/phet-core';
+import { RichText, RichTextOptions } from 'scenerystack/scenery';
 
 export type UITextOptions = RichTextOptions;
 

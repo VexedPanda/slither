@@ -1,12 +1,11 @@
 import { PatternNode, PatternNodeOptions } from './PatternNode.ts';
 
-import { optionize } from 'phet-lib/phet-core';
-import { HBox, Node, NodeOptions } from 'phet-lib/scenery';
-import { ArrowNode } from 'phet-lib/scenery-phet';
+import { optionize } from 'scenerystack/phet-core';
+import { HBox, Node, NodeOptions } from 'scenerystack/scenery';
+import { ArrowNode } from 'scenerystack/scenery-phet';
 
 import { TPlanarPatternMap } from '../../model/pattern/pattern-board/planar-map/TPlanarPatternMap.ts';
 import { PatternRule } from '../../model/pattern/pattern-rule/PatternRule.ts';
-
 
 type SelfOptions = {
   patternNodeOptions?: PatternNodeOptions;

@@ -1,6 +1,6 @@
-import { TReadOnlyProperty, TinyEmitter } from 'phet-lib/axon';
-import { Bounds2 } from 'phet-lib/dot';
-import { Node } from 'phet-lib/scenery';
+import { TReadOnlyProperty, TinyEmitter } from 'scenerystack/axon';
+import { Bounds2 } from 'scenerystack/dot';
+import { Node } from 'scenerystack/scenery';
 
 export class ViewContext {
   public constructor(

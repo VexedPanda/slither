@@ -4,10 +4,10 @@ import { TPuzzleStyle } from './puzzle/TPuzzleStyle.ts';
 import { hookPuzzleBackgroundListeners } from './puzzle/hookPuzzleBackgroundListeners.ts';
 import { currentPuzzleStyle } from './puzzle/puzzleStyles.ts';
 
-import { Multilink, TReadOnlyProperty } from 'phet-lib/axon';
-import { Bounds2, Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { optionize } from 'phet-lib/phet-core';
+import { Multilink, TReadOnlyProperty } from 'scenerystack/axon';
+import { Bounds2, Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { optionize } from 'scenerystack/phet-core';
 import {
   AnimatedPanZoomListener,
   LinearGradient,
@@ -17,7 +17,7 @@ import {
   Rectangle,
   Sizable,
   SizableOptions,
-} from 'phet-lib/scenery';
+} from 'scenerystack/scenery';
 
 import { showLayoutTestProperty } from '../model/board/layout/layout.ts';
 import { isFaceColorOutsideAvailableEditModeProperty } from '../model/puzzle/EditMode.ts';

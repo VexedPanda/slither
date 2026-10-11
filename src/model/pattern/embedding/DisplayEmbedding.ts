@@ -30,7 +30,7 @@ import { PatternRule } from '../pattern-rule/PatternRule.ts';
 import { Embedding } from './Embedding.ts';
 import { computeEmbeddings } from './computeEmbeddings.ts';
 
-import { Bounds2 } from 'phet-lib/dot';
+import { Bounds2 } from 'scenerystack/dot';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

@@ -1,4 +1,5 @@
-import { AlignBox, Display, FireListener, Node, Rectangle, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, Display, FireListener, Node, Rectangle, VBox } from 'scenerystack/scenery';
 
 import { curatedRules } from '../model/pattern/data/curatedRules.ts';
 import { getEmbeddings } from '../model/pattern/embedding/getEmbeddings.ts';
@@ -12,8 +13,7 @@ import { PatternRuleNode } from '../view/pattern/PatternRuleNode.ts';
 
 const DO_FILTER = true;
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

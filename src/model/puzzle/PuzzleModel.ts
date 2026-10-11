@@ -58,9 +58,9 @@ import {
   TReadOnlyProperty,
   TinyEmitter,
   TinyProperty,
-} from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
-import { optionize } from 'phet-lib/phet-core';
+} from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
+import { optionize } from 'scenerystack/phet-core';
 
 import { LocalStorageBooleanProperty, LocalStorageNumberProperty } from '../../util/localStorage.ts';
 

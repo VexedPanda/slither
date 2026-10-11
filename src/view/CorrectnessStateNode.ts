@@ -1,7 +1,8 @@
+import { GaussianBlur } from './GaussianBlur.ts';
 import { currentTheme } from './Theme.ts';
 
-import { LineStyles, Shape, Subpath } from 'phet-lib/kite';
-import { GaussianBlur, Node, Path } from 'phet-lib/scenery';
+import { LineStyles, Shape, Subpath } from 'scenerystack/kite';
+import { Node, Path } from 'scenerystack/scenery';
 
 import { CorrectnessState } from '../model/CorrectnessState.ts';
 import { TBoard } from '../model/board/core/TBoard.ts';

@@ -1,7 +1,7 @@
-import { BooleanProperty, DerivedProperty, DynamicProperty, TReadOnlyProperty } from 'phet-lib/axon';
-import { platform } from 'phet-lib/phet-core';
-import { Color, Font, PaintColorProperty } from 'phet-lib/scenery';
-import { RectangularButton } from 'phet-lib/sun';
+import { BooleanProperty, DerivedProperty, DynamicProperty, TReadOnlyProperty } from 'scenerystack/axon';
+import { platform } from 'scenerystack/phet-core';
+import { Color, Font, PaintColorProperty } from 'scenerystack/scenery';
+import { RectangularButton } from 'scenerystack/sun';
 
 import { okhslToRGBString, parseToOKHSL } from '../util/color.ts';
 import { copyToClipboard } from '../util/copyToClipboard.ts';

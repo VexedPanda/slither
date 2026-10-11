@@ -1,10 +1,11 @@
 import '../main.css';
 
-import { NumberProperty, PatternStringProperty, Property, StringProperty } from 'phet-lib/axon';
-import { Bounds2 } from 'phet-lib/dot';
-import { platform } from 'phet-lib/phet-core';
-import { AlignBox, AnimatedPanZoomListener, Display, Font, Node, Text, VBox } from 'phet-lib/scenery';
-import { TextPushButton } from 'phet-lib/sun';
+import { enableAssert } from 'scenerystack/assert';
+import { NumberProperty, PatternStringProperty, Property, StringProperty } from 'scenerystack/axon';
+import { Bounds2 } from 'scenerystack/dot';
+import { platform } from 'scenerystack/phet-core';
+import { AlignBox, AnimatedPanZoomListener, Display, Font, Node, Text, VBox } from 'scenerystack/scenery';
+import { TextPushButton } from 'scenerystack/sun';
 
 import scanURL from '../scan/scanURL.ts';
 
@@ -20,8 +21,7 @@ if (opencvURL) {
   // } )();
 }
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 
@@ -105,7 +105,6 @@ const resize = () => {
 const resizeListener = () => {
   resizePending = true;
 };
-$(window).resize(resizeListener);
 window.addEventListener('resize', resizeListener);
 window.addEventListener('orientationchange', resizeListener);
 window.visualViewport && window.visualViewport.addEventListener('resize', resizeListener);

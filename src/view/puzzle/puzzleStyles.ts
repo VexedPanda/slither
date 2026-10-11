@@ -37,7 +37,7 @@ import {
   Property,
   TReadOnlyProperty,
   TinyProperty,
-} from 'phet-lib/axon';
+} from 'scenerystack/axon';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TCompleteData } from '../../model/data/combined/TCompleteData.ts';

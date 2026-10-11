@@ -1,11 +1,12 @@
 // Seeded generation benchmark (see bench.ts), run in a worker like the real generator.
-import { TinyEmitter, TinyProperty } from 'phet-lib/axon';
-import { dotRandom } from 'phet-lib/dot';
+import { TinyEmitter, TinyProperty } from 'scenerystack/axon';
+import { dotRandom } from 'scenerystack/dot';
 
 import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard.ts';
 import CanSolveDifficulty from '../model/generator/CanSolveDifficulty.ts';
 import { generateAdditiveConstrained } from '../model/generator/generateAdditiveConstrained.ts';
 import { serializeSolvedPuzzle } from '../model/generator/serializeSolvedPuzzle.ts';
+
 import { sleep } from '../util/sleep.ts';
 
 const mulberry32 = (seed: number) => () => {

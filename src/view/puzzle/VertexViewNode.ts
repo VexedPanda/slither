@@ -1,8 +1,8 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { Multilink, TReadOnlyProperty } from 'phet-lib/axon';
-import { Shape } from 'phet-lib/kite';
-import { Path } from 'phet-lib/scenery';
+import { Multilink, TReadOnlyProperty } from 'scenerystack/axon';
+import { Shape } from 'scenerystack/kite';
+import { Path } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TState } from '../../model/data/core/TState.ts';
@@ -10,7 +10,6 @@ import EdgeState from '../../model/data/edge-state/EdgeState.ts';
 import { TEdgeStateData } from '../../model/data/edge-state/TEdgeStateData.ts';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
-
 
 const smallRadius = 0.03;
 const largeRadius = 0.05;

@@ -1,6 +1,5 @@
-import 'phet-lib';
+import { QueryStringMachine } from 'scenerystack/query-string-machine';
 
-// @ts-expect-error
 export default QueryStringMachine.getAll({
   p: {
     type: 'string',

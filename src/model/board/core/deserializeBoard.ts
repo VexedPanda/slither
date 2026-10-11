@@ -7,7 +7,7 @@ import { TBoard } from './TBoard.ts';
 import { TSerializedBoard } from './TSerializedBoard.ts';
 import { TFaceDescriptor, TVertexDescriptor, createBoardDescriptor } from './createBoardDescriptor.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

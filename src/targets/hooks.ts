@@ -1,5 +1,5 @@
-import { TinyEmitter, TinyProperty } from 'phet-lib/axon';
-import { Display, Node } from 'phet-lib/scenery';
+import { TinyEmitter, TinyProperty } from 'scenerystack/axon';
+import { Display, Node } from 'scenerystack/scenery';
 
 import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard.ts';
 import { TStructure } from '../model/board/core/TStructure.ts';
@@ -34,8 +34,7 @@ import { compressString } from '../util/compression.ts';
 
 // Load with `http://localhost:5173/rules-test.html?debugger`
 
-// // @ts-expect-error
-// window.assertions.enableAssert();
+// enableAssert();
 
 const scene = new Node();
 

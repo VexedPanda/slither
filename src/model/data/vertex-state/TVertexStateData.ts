@@ -5,7 +5,7 @@ import { serializeVertex } from '../../board/core/serializeVertex.ts';
 import { TSerializedState } from '../core/TSerializedState.ts';
 import { TSerializedVertexState, VertexState } from './VertexState.ts';
 
-import { TEmitter } from 'phet-lib/axon';
+import { TEmitter } from 'scenerystack/axon';
 
 export interface TVertexStateData {
   getVertexState(vertex: TVertex): VertexState;

@@ -1,4 +1,5 @@
-import { AlignBox, Display, FireListener, Node, Rectangle, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, Display, FireListener, Node, Rectangle, VBox } from 'scenerystack/scenery';
 
 import { curatedRules } from '../model/pattern/data/curatedRules.ts';
 import { planarPatternMaps } from '../model/pattern/pattern-board/planar-map/planarPatternMaps.ts';
@@ -8,8 +9,7 @@ import { copyToClipboard } from '../util/copyToClipboard.ts';
 
 import { PatternRuleNode } from '../view/pattern/PatternRuleNode.ts';
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

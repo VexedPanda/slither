@@ -21,10 +21,10 @@ import {
   vertexStatePuzzleStyle,
 } from './puzzle/puzzleStyles.ts';
 
-import { DerivedProperty, TinyProperty } from 'phet-lib/axon';
-import { Matrix3 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { AlignGroup, Node, Path, Rectangle } from 'phet-lib/scenery';
+import { DerivedProperty, TinyProperty } from 'scenerystack/axon';
+import { Matrix3 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { AlignGroup, Node, Path, Rectangle } from 'scenerystack/scenery';
 
 import { puzzleFromCompressedString } from '../model/puzzle/puzzleFromCompressedString.ts';
 
@@ -51,64 +51,60 @@ export default class ViewStyleBarNode extends UIRectangularRadioButtonGroup<TPuz
       {
         value: classicPuzzleStyle,
         createNode: () => classicIcon,
-        labelContent: 'Classic',
-        options: {},
+        options: { accessibleName: 'Classic' },
       },
       {
         value: basicLinesPuzzleStyle,
         createNode: () => basicLinesIcon,
-        labelContent: 'Lines',
-        options: {},
+        options: { accessibleName: 'Lines' },
       },
       {
         value: basicFaceColoringPuzzleStyle,
         createNode: () => basicFaceColoringIcon,
-        labelContent: 'Lines and Colors',
-        options: {},
+        options: { accessibleName: 'Lines and Colors' },
       },
       {
         value: pureFaceColorPuzzleStyle,
         createNode: () => pureFaceColoringIcon,
-        labelContent: 'Colors',
-        options: {},
+        options: { accessibleName: 'Colors' },
       },
       {
         value: basicSectorsPuzzleStyle,
         createNode: () => basicSectorsIcon,
-        labelContent: 'Sectors',
         options: {
+          accessibleName: 'Sectors',
           visibleProperty: showSectorViewModesProperty,
         },
       },
       {
         value: sectorsWithColorsPuzzleStyle,
         createNode: () => sectorsWithColorsIcon,
-        labelContent: 'Sectors and Colors',
         options: {
+          accessibleName: 'Sectors and Colors',
           visibleProperty: showSectorViewModesProperty,
         },
       },
       {
         value: vertexStatePuzzleStyle,
         createNode: () => vertexStateIcon,
-        labelContent: 'Vertex State',
         options: {
+          accessibleName: 'Vertex State',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },
       {
         value: faceStatePuzzleStyle,
         createNode: () => faceStateIcon,
-        labelContent: 'Face State',
         options: {
+          accessibleName: 'Face State',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },
       {
         value: customPuzzleStyle,
         createNode: () => customIcon,
-        labelContent: 'Custom',
         options: {
+          accessibleName: 'Custom',
           visibleProperty: advancedSettingsVisibleProperty,
         },
       },

@@ -7,7 +7,7 @@ import { TState } from '../core/TState.ts';
 import FaceValue from './FaceValue.ts';
 import { TFaceValueData } from './TFaceValueData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 export class FaceValueValidator implements TState<TFaceValueData> {
   public readonly faceValueChangedEmitter = new TinyEmitter<[TFace, FaceValue]>();

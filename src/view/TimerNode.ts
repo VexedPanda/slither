@@ -1,8 +1,8 @@
 import { currentTheme, timerFont } from './Theme.ts';
 
-import { DerivedProperty, TReadOnlyProperty } from 'phet-lib/axon';
-import { EmptySelfOptions, optionize } from 'phet-lib/phet-core';
-import { Text, TextOptions } from 'phet-lib/scenery';
+import { DerivedProperty, TReadOnlyProperty } from 'scenerystack/axon';
+import { EmptySelfOptions, optionize } from 'scenerystack/phet-core';
+import { Text, TextOptions } from 'scenerystack/scenery';
 
 export class TimerNode extends Text {
   public constructor(

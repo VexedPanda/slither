@@ -7,7 +7,7 @@ import { serializeEdge } from '../../board/core/serializeEdge.ts';
 import { serializeHalfEdge } from '../../board/core/serializeHalfEdge.ts';
 import { TSerializedState } from '../core/TSerializedState.ts';
 
-import { TEmitter } from 'phet-lib/axon';
+import { TEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

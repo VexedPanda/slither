@@ -1,7 +1,7 @@
 import { puzzleFont } from '../Theme.ts';
 
-import { Shape } from 'phet-lib/kite';
-import { Line, Node, Path, Rectangle, Text } from 'phet-lib/scenery';
+import { Shape } from 'scenerystack/kite';
+import { Line, Node, Path, Rectangle, Text } from 'scenerystack/scenery';
 
 import { Embedding } from '../../model/pattern/embedding/Embedding.ts';
 import { BoardPatternBoard } from '../../model/pattern/pattern-board/BoardPatternBoard.ts';

@@ -1,9 +1,10 @@
 import '../main.css';
 
-import { DynamicProperty, Multilink, Property, TReadOnlyProperty, TinyEmitter, TinyProperty } from 'phet-lib/axon';
-import { Bounds2 } from 'phet-lib/dot';
-import { platform } from 'phet-lib/phet-core';
-import { AlignBox, Display, HBox, ManualConstraint, Node, VBox, globalKeyStateTracker } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { DynamicProperty, Multilink, Property, TReadOnlyProperty, TinyEmitter, TinyProperty } from 'scenerystack/axon';
+import { Bounds2 } from 'scenerystack/dot';
+import { platform } from 'scenerystack/phet-core';
+import { AlignBox, Display, HBox, ManualConstraint, Node, VBox, globalKeyStateTracker } from 'scenerystack/scenery';
 
 import SlitherQueryParameters from '../SlitherQueryParameters.ts';
 
@@ -33,12 +34,10 @@ import { scene } from '../view/scene.ts';
 
 // TODO: also see web worker cases where this is used
 // TODO: factor out
-// @ts-expect-error
-if (window.assertions && !import.meta.env.PROD) {
+if (!import.meta.env.PROD) {
   // TODO: We should actually... have stripped these, something is going wrong
   console.log('enabling assertions');
-  // @ts-expect-error
-  window.assertions.enableAssert();
+  enableAssert();
 }
 
 const rootNode = new Node({
@@ -181,7 +180,6 @@ const resize = () => {
 const resizeListener = () => {
   resizePending = true;
 };
-$(window).resize(resizeListener);
 window.addEventListener('resize', resizeListener);
 window.addEventListener('orientationchange', resizeListener);
 window.visualViewport && window.visualViewport.addEventListener('resize', resizeListener);

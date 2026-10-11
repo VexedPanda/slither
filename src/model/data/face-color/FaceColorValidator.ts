@@ -7,7 +7,7 @@ import { TSerializedState } from '../core/TSerializedState.ts';
 import { TState } from '../core/TState.ts';
 import FaceColorState, { TFaceColor, TFaceColorData } from './TFaceColorData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

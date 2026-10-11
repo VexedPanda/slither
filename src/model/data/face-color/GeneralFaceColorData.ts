@@ -12,8 +12,8 @@ import FaceColorState, {
   serializeFaceColorData,
 } from './TFaceColorData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
-import { dotRandom } from 'phet-lib/dot';
+import { TinyEmitter } from 'scenerystack/axon';
+import { dotRandom } from 'scenerystack/dot';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

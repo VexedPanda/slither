@@ -7,7 +7,7 @@ import { TSerializedState } from '../core/TSerializedState.ts';
 import { TState } from '../core/TState.ts';
 import { TSimpleRegion, TSimpleRegionData } from './TSimpleRegionData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

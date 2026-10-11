@@ -1,6 +1,6 @@
 import { TFaceValueStyle, TLineCap, TLineJoin, TRedLineStyle, TRuntimeTheme, TVertexStyle } from '../Theme.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
+import { TReadOnlyProperty } from 'scenerystack/axon';
 
 import { TStructure } from '../../model/board/core/TStructure.ts';
 import { TCompleteData } from '../../model/data/combined/TCompleteData.ts';

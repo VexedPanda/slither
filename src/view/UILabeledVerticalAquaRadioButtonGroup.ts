@@ -1,10 +1,10 @@
 import { currentTheme, uiHeaderFont } from './Theme.ts';
 import { UIAquaRadioButtonGroup, UIAquaRadioButtonGroupOptions } from './UIAquaRadioButtonGroup.ts';
 
-import { Property } from 'phet-lib/axon';
-import { optionize } from 'phet-lib/phet-core';
-import { Text, VBox, VBoxOptions } from 'phet-lib/scenery';
-import { AquaRadioButtonGroupItem } from 'phet-lib/sun';
+import { Property } from 'scenerystack/axon';
+import { optionize } from 'scenerystack/phet-core';
+import { Text, VBox, VBoxOptions } from 'scenerystack/scenery';
+import { AquaRadioButtonGroupItem } from 'scenerystack/sun';
 
 type SelfOptions = {
   radioButtonGroupOptions?: UIAquaRadioButtonGroupOptions;

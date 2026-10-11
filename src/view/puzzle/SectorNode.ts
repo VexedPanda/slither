@@ -1,13 +1,12 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { Color, Node } from 'phet-lib/scenery';
+import { TReadOnlyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { Color, Node } from 'scenerystack/scenery';
 
 import SectorState from '../../model/data/sector-state/SectorState.ts';
 import { TSector } from '../../model/data/sector-state/TSector.ts';
-
 
 // TODO: it lives for the statics, is that fine?
 export class SectorNode extends Node {

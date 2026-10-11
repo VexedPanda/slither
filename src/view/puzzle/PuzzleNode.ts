@@ -16,10 +16,10 @@ import { VertexStateViewNode } from './VertexStateViewNode.ts';
 import { VertexViewNode } from './VertexViewNode.ts';
 import { currentPuzzleStyle } from './puzzleStyles.ts';
 
-import { DerivedProperty, Property, TEmitter, TReadOnlyProperty, TinyEmitter } from 'phet-lib/axon';
-import { Bounds2, Vector2 } from 'phet-lib/dot';
-import { combineOptions, optionize, platform } from 'phet-lib/phet-core';
-import { Node, NodeOptions, PressListenerEvent, TextOptions } from 'phet-lib/scenery';
+import { DerivedProperty, Property, TEmitter, TReadOnlyProperty, TinyEmitter } from 'scenerystack/axon';
+import { Bounds2, Vector2 } from 'scenerystack/dot';
+import { combineOptions, optionize, platform } from 'scenerystack/phet-core';
+import { Node, NodeOptions, PressListenerEvent, TextOptions } from 'scenerystack/scenery';
 
 import { TEdge } from '../../model/board/core/TEdge.ts';
 import { TFace } from '../../model/board/core/TFace.ts';

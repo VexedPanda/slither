@@ -1,6 +1,6 @@
-import { TReadOnlyProperty } from 'phet-lib/axon';
-import { Node } from 'phet-lib/scenery';
-import { ButtonInteractionState, TContentAppearanceStrategyOptions } from 'phet-lib/sun';
+import { TReadOnlyProperty } from 'scenerystack/axon';
+import { Node } from 'scenerystack/scenery';
+import { ButtonInteractionState, TContentAppearanceStrategyOptions } from 'scenerystack/sun';
 
 export class UIStickyToggleContentAppearanceStrategy {
   public readonly dispose: () => void;

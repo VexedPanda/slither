@@ -1,10 +1,10 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
-import { Vector2, dotRandom } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { Enumeration, EnumerationValue, arrayDifference } from 'phet-lib/phet-core';
-import { Color, Node, Path, TPaint } from 'phet-lib/scenery';
+import { TReadOnlyProperty } from 'scenerystack/axon';
+import { Vector2, dotRandom } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { Enumeration, EnumerationValue, arrayDifference } from 'scenerystack/phet-core';
+import { Color, Node, Path, TPaint } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TFace } from '../../model/board/core/TFace.ts';

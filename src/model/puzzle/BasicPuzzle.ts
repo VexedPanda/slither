@@ -11,9 +11,9 @@ import FaceValue from '../data/face-value/FaceValue.ts';
 import { TFaceValueData } from '../data/face-value/TFaceValueData.ts';
 import { TSolvedPuzzle } from '../generator/TSolvedPuzzle.ts';
 
-import { TProperty, TinyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
-import { Orientation } from 'phet-lib/phet-core';
+import { TProperty, TinyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
+import { Orientation } from 'scenerystack/phet-core';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
 

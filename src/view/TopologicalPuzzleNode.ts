@@ -1,7 +1,7 @@
 import PuzzleNode from './puzzle/PuzzleNode.ts';
 
-import { combineOptions } from 'phet-lib/phet-core';
-import { Node, NodeOptions } from 'phet-lib/scenery';
+import { combineOptions } from 'scenerystack/phet-core';
+import { Node, NodeOptions } from 'scenerystack/scenery';
 
 import { TStructure } from '../model/board/core/TStructure.ts';
 import { LayoutDerivative } from '../model/board/layout/LayoutDerivative.ts';

@@ -1,8 +1,8 @@
 import { glassPane } from './glassPane.ts';
 import PuzzleNode from './puzzle/PuzzleNode.ts';
 
-import { TinyProperty } from 'phet-lib/axon';
-import { NodeOptions } from 'phet-lib/scenery';
+import { TinyProperty } from 'scenerystack/axon';
+import { NodeOptions } from 'scenerystack/scenery';
 
 import { TBoard } from '../model/board/core/TBoard.ts';
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';

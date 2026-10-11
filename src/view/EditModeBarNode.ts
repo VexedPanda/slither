@@ -8,11 +8,11 @@ import { UIStickyToggleButtonAppearanceStrategy } from './UIStickyToggleButtonAp
 import { UIStickyToggleContentAppearanceStrategy } from './UIStickyToggleContentAppearanceStrategy.ts';
 import { ViewContext } from './ViewContext.ts';
 
-import { Matrix3 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { combineOptions } from 'phet-lib/phet-core';
-import { AlignGroup, HBox, Line, Node, Path, Rectangle, VSeparator } from 'phet-lib/scenery';
-import { BooleanRectangularStickyToggleButton, BooleanRectangularStickyToggleButtonOptions } from 'phet-lib/sun';
+import { Matrix3 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { combineOptions } from 'scenerystack/phet-core';
+import { AlignGroup, HBox, Line, Node, Path, Rectangle, VSeparator } from 'scenerystack/scenery';
+import { BooleanRectangularStickyToggleButton, BooleanRectangularStickyToggleButtonOptions } from 'scenerystack/sun';
 
 import EditMode, { editModeProperty, eraserEnabledProperty } from '../model/puzzle/EditMode.ts';
 
@@ -48,57 +48,57 @@ export default class EditModeBarNode extends HBox {
       [
         {
           value: EditMode.EDGE_STATE,
-          labelContent: 'Edge Edit Mode',
           createNode: () => wrapIcon(edgeIcon),
           options: {
+            accessibleName: 'Edge Edit Mode',
             visibleProperty: EditMode.EDGE_STATE.isEnabledProperty,
           },
         },
         {
           value: EditMode.EDGE_STATE_REVERSED,
-          labelContent: 'Edge Reversed Edit Mode',
           createNode: () => wrapIcon(edgeReversedIcon),
           options: {
+            accessibleName: 'Edge Reversed Edit Mode',
             visibleProperty: EditMode.EDGE_STATE_REVERSED.isEnabledProperty,
           },
         },
         {
           value: EditMode.FACE_COLOR_INSIDE,
-          labelContent: 'Face Color Inside Edit Mode',
           createNode: () => wrapIcon(faceColorInsideIcon),
           options: {
+            accessibleName: 'Face Color Inside Edit Mode',
             visibleProperty: EditMode.FACE_COLOR_INSIDE.isEnabledProperty,
           },
         },
         {
           value: EditMode.FACE_COLOR_OUTSIDE,
-          labelContent: 'Face Color Outside Edit Mode',
           createNode: () => wrapIcon(faceColorOutsideIcon),
           options: {
+            accessibleName: 'Face Color Outside Edit Mode',
             visibleProperty: EditMode.FACE_COLOR_OUTSIDE.isEnabledProperty,
           },
         },
         {
           value: EditMode.FACE_COLOR_MATCH,
-          labelContent: 'Face Color Match Edit Mode',
           createNode: () => wrapIcon(faceColorMatchIcon),
           options: {
+            accessibleName: 'Face Color Match Edit Mode',
             visibleProperty: EditMode.FACE_COLOR_MATCH.isEnabledProperty,
           },
         },
         {
           value: EditMode.FACE_COLOR_OPPOSITE,
-          labelContent: 'Face Color Opposite Edit Mode',
           createNode: () => wrapIcon(faceColorOppositeIcon),
           options: {
+            accessibleName: 'Face Color Opposite Edit Mode',
             visibleProperty: EditMode.FACE_COLOR_OPPOSITE.isEnabledProperty,
           },
         },
         {
           value: EditMode.SECTOR_STATE,
-          labelContent: 'Sector Edit Mode',
           createNode: () => wrapIcon(sectorIcon),
           options: {
+            accessibleName: 'Sector Edit Mode',
             visibleProperty: EditMode.SECTOR_STATE.isEnabledProperty,
           },
         },

@@ -6,7 +6,7 @@ import { GeneralVertexStateAction } from './GeneralVertexStateAction.ts';
 import { TSerializedVertexStateData, TVertexStateData, serializeVertexStateData } from './TVertexStateData.ts';
 import { VertexState } from './VertexState.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 export class GeneralVertexStateDelta extends GeneralVertexStateAction implements TDelta<TVertexStateData> {
   public readonly vertexStateChangedEmitter = new TinyEmitter<

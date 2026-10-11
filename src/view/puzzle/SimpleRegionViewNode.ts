@@ -1,11 +1,11 @@
 import { TLineCap, TLineJoin } from '../Theme.ts';
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { DerivedProperty, TReadOnlyProperty } from 'phet-lib/axon';
-import { Vector2, dotRandom } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { arrayDifference } from 'phet-lib/phet-core';
-import { Color, Line, Node, Path, TPaint } from 'phet-lib/scenery';
+import { DerivedProperty, TReadOnlyProperty } from 'scenerystack/axon';
+import { Vector2, dotRandom } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { arrayDifference } from 'scenerystack/phet-core';
+import { Color, Line, Node, Path, TPaint } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TEdge } from '../../model/board/core/TEdge.ts';
@@ -15,7 +15,6 @@ import { TSimpleRegion, TSimpleRegionData } from '../../model/data/simple-region
 import { highlightIntersectionsProperty } from '../../model/puzzle/PuzzleModel.ts';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
-
 
 export class SimpleRegionViewNode extends Node {
   private readonly simpleRegionNodeMap: Map<TSimpleRegion, SimpleRegionNode> = new Map();

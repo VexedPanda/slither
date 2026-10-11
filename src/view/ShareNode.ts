@@ -4,8 +4,8 @@ import { UITextCheckbox } from './UITextCheckbox.ts';
 import { UITextPushButton } from './UITextPushButton.ts';
 import { ViewContext } from './ViewContext.ts';
 
-import { BooleanProperty } from 'phet-lib/axon';
-import { VBox } from 'phet-lib/scenery';
+import { BooleanProperty } from 'scenerystack/axon';
+import { VBox } from 'scenerystack/scenery';
 
 import { TStructure } from '../model/board/core/TStructure.ts';
 import { CompleteData } from '../model/data/combined/CompleteData.ts';
@@ -15,7 +15,6 @@ import { TPropertyPuzzle } from '../model/puzzle/TPuzzle.ts';
 import { puzzleToCompressedString } from '../model/puzzle/puzzleToCompressedString.ts';
 
 import { copyToClipboard } from '../util/copyToClipboard.ts';
-
 
 export class ShareNode extends PopupNode {
   private readonly includeStateProperty;

@@ -1,12 +1,11 @@
 import cv from '@techstark/opencv-js';
 
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
 
 import SlitherQueryParameters from '../SlitherQueryParameters.ts';
 
 import _ from '../workarounds/_';
-
 
 export const cvReady = new Promise((resolve) => {
   // @ts-expect-error
@@ -151,7 +150,6 @@ export const imshow = (mat: cv.Mat) => {
     document.body.appendChild(matToCanvas(mat));
   }
 };
-
 
 // {
 //   const lines = new cv.Mat();

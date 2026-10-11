@@ -1,8 +1,8 @@
 import { isDragModeProperty } from '../PanDragMode.ts';
 import { ShapeInteractionNode } from './ShapeInteractionNode.ts';
 
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TFace } from '../../model/board/core/TFace.ts';

@@ -23,7 +23,7 @@ import { MultipleSolutionsError } from './errors/MultipleSolutionsError.ts';
 // @ts-expect-error
 import Logic from './logic-solver/logic-solver.js';
 
-import { Combination } from 'phet-lib/dot';
+import { Combination } from 'scenerystack/dot';
 
 // Start over with a new solver when it gets this many clauses (retired clauses still take memory)
 const MAX_CLAUSES = 200000;

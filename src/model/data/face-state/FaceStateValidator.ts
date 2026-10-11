@@ -6,7 +6,7 @@ import { TState } from '../core/TState.ts';
 import { FaceState } from './FaceState.ts';
 import { TFaceStateData, TSerializedFaceStateData } from './TFaceStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

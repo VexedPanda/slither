@@ -1,6 +1,6 @@
 import { clampChroma, converter, formatHex, parse, toGamut } from 'culori';
 
-import { Color } from 'phet-lib/scenery';
+import { Color } from 'scenerystack/scenery';
 
 export const toRGB = toGamut('rgb', 'oklch');
 const okhslConverter = converter('okhsl');

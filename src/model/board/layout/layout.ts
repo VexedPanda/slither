@@ -5,7 +5,7 @@ import { BaseVertex } from '../core/BaseVertex.ts';
 import { TEdge } from '../core/TEdge.ts';
 import { TFace } from '../core/TFace.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import { LocalStorageBooleanProperty } from '../../../util/localStorage.ts';
 

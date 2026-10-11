@@ -3,8 +3,8 @@ import { TSerializedFace } from '../../board/core/TSerializedFace.ts';
 import { serializeFace } from '../../board/core/serializeFace.ts';
 import { TSerializedState } from '../core/TSerializedState.ts';
 
-import { TEmitter } from 'phet-lib/axon';
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { TEmitter } from 'scenerystack/axon';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

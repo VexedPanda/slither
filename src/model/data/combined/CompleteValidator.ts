@@ -27,7 +27,7 @@ import { VertexState } from '../vertex-state/VertexState.ts';
 import { VertexStateValidator } from '../vertex-state/VertexStateValidator.ts';
 import { TCompleteData, TSerializedCompleteData } from './TCompleteData.ts';
 
-import { TEmitter, TinyEmitter } from 'phet-lib/axon';
+import { TEmitter, TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

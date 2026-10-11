@@ -1,8 +1,9 @@
-import { BooleanProperty, DerivedProperty, Multilink, Property } from 'phet-lib/axon';
-import { Bounds2, Range } from 'phet-lib/dot';
-import { Enumeration, EnumerationValue, Orientation, platform } from 'phet-lib/phet-core';
-import { AlignBox, Display, FireListener, GridBox, HBox, Node, Text, VBox } from 'phet-lib/scenery';
-import { ArrowButton, Panel, Slider } from 'phet-lib/sun';
+import { enableAssert } from 'scenerystack/assert';
+import { BooleanProperty, DerivedProperty, Multilink, Property } from 'scenerystack/axon';
+import { Bounds2, Range } from 'scenerystack/dot';
+import { Enumeration, EnumerationValue, Orientation, platform } from 'scenerystack/phet-core';
+import { AlignBox, Display, FireListener, GridBox, HBox, Node, Text, VBox } from 'scenerystack/scenery';
+import { ArrowButton, Panel, Slider } from 'scenerystack/sun';
 
 import { generalAllMixedGroup } from '../model/pattern/collection/generalAllMixedGroup.ts';
 import { generalColorMixedGroup } from '../model/pattern/collection/generalColorMixedGroup.ts';
@@ -42,8 +43,7 @@ import assert, { assertEnabled } from '../workarounds/assert.ts';
 
 // Load with `http://localhost:5173/rule-explorer?debugger`
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 
@@ -256,22 +256,22 @@ class ViewStyleMode extends EnumerationValue {
     {
       value: ViewStyleMode.CLASSIC,
       createNode: () => new UIText('Classic'),
-      labelContent: 'Classic',
+      options: { accessibleName: 'Classic' },
     },
     {
       value: ViewStyleMode.GENERIC,
       createNode: () => new UIText('Generic'),
-      labelContent: 'Generic',
+      options: { accessibleName: 'Generic' },
     },
     {
       value: ViewStyleMode.LINES,
       createNode: () => new UIText('Lines'),
-      labelContent: 'Lines',
+      options: { accessibleName: 'Lines' },
     },
     {
       value: ViewStyleMode.COLORS,
       createNode: () => new UIText('Colors'),
-      labelContent: 'Colors',
+      options: { accessibleName: 'Colors' },
     },
   ]);
 
@@ -294,17 +294,17 @@ class ViewStyleMode extends EnumerationValue {
   const collectionRadioButtonGroup = new UILabeledVerticalAquaRadioButtonGroup('Collection', collectionModeProperty, [
     {
       value: CollectionMode.EDGE,
-      labelContent: 'Edge',
       createNode: () => new UIText('Edge'),
       options: {
+        accessibleName: 'Edge',
         enabledProperty: new BooleanProperty(true),
       },
     },
     {
       value: CollectionMode.COLOR,
-      labelContent: 'Color',
       createNode: () => new UIText('Color'),
       options: {
+        accessibleName: 'Color',
         enabledProperty: new DerivedProperty(
           [viewStyleModeProperty],
           (viewStyleMode) => viewStyleMode !== ViewStyleMode.CLASSIC && viewStyleMode !== ViewStyleMode.LINES,
@@ -313,9 +313,9 @@ class ViewStyleMode extends EnumerationValue {
     },
     {
       value: CollectionMode.EDGE_COLOR,
-      labelContent: 'Edge + Color',
       createNode: () => new UIText('Edge + Color'),
       options: {
+        accessibleName: 'Edge + Color',
         enabledProperty: new DerivedProperty(
           [viewStyleModeProperty],
           (viewStyleMode) => viewStyleMode !== ViewStyleMode.CLASSIC && viewStyleMode !== ViewStyleMode.LINES,
@@ -324,9 +324,9 @@ class ViewStyleMode extends EnumerationValue {
     },
     {
       value: CollectionMode.EDGE_SECTOR,
-      labelContent: 'Edge + Sector',
       createNode: () => new UIText('Edge + Sector'),
       options: {
+        accessibleName: 'Edge + Sector',
         enabledProperty: new DerivedProperty(
           [viewStyleModeProperty],
           (viewStyleMode) => viewStyleMode !== ViewStyleMode.CLASSIC,
@@ -335,9 +335,9 @@ class ViewStyleMode extends EnumerationValue {
     },
     {
       value: CollectionMode.ALL,
-      labelContent: 'Edge + Color + Sector',
       createNode: () => new UIText('Edge + Color + Sector'),
       options: {
+        accessibleName: 'Edge + Color + Sector',
         enabledProperty: new DerivedProperty(
           [viewStyleModeProperty],
           (viewStyleMode) => viewStyleMode !== ViewStyleMode.CLASSIC && viewStyleMode !== ViewStyleMode.LINES,
@@ -349,17 +349,17 @@ class ViewStyleMode extends EnumerationValue {
   const highlanderRadioButtonGroup = new UILabeledVerticalAquaRadioButtonGroup('Highlander', highlanderModeProperty, [
     {
       value: HighlanderMode.ALL,
-      labelContent: 'All',
+      options: { accessibleName: 'All' },
       createNode: () => new UIText('All'),
     },
     {
       value: HighlanderMode.REGULAR,
-      labelContent: 'Regular',
+      options: { accessibleName: 'Regular' },
       createNode: () => new UIText('Regular'),
     },
     {
       value: HighlanderMode.HIGHLANDER,
-      labelContent: 'Highlander Only',
+      options: { accessibleName: 'Highlander Only' },
       createNode: () => new UIText('Highlander Only'),
     },
   ]);
@@ -367,12 +367,12 @@ class ViewStyleMode extends EnumerationValue {
   const filterRadioButtonGroup = new UILabeledVerticalAquaRadioButtonGroup('Filter', filterModeProperty, [
     {
       value: FilterMode.NONE,
-      labelContent: 'None',
+      options: { accessibleName: 'None' },
       createNode: () => new UIText('None'),
     },
     {
       value: FilterMode.ONLY_NUMBERS_AND_EXIT_RED,
-      labelContent: 'Only Numbers and Red',
+      options: { accessibleName: 'Only Numbers and Red' },
       createNode: () => new UIText('Only Numbers and Red'),
     },
   ]);
@@ -380,7 +380,7 @@ class ViewStyleMode extends EnumerationValue {
   const tilingRadioButtonGroup = new UILabeledVerticalAquaRadioButtonGroup('Compatible Tiling', displayTilingProperty, [
     {
       value: null,
-      labelContent: 'All',
+      options: { accessibleName: 'All' },
       createNode: () => new UIText('All'),
     },
     ...DisplayTiling.enumeration.values.map((displayTiling) => {
@@ -632,7 +632,6 @@ class ViewStyleMode extends EnumerationValue {
   const resizeListener = () => {
     resizePending = true;
   };
-  $(window).resize(resizeListener);
   window.addEventListener('resize', resizeListener);
   window.addEventListener('orientationchange', resizeListener);
   window.visualViewport && window.visualViewport.addEventListener('resize', resizeListener);

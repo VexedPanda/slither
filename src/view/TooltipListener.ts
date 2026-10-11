@@ -1,9 +1,9 @@
 import { tooltipFont } from './Theme.ts';
 import { ViewContext } from './ViewContext.ts';
 
-import { TimerListener, stepTimer } from 'phet-lib/axon';
-import { Node, Pointer, SceneryEvent, TInputListener, Text } from 'phet-lib/scenery';
-import { Panel } from 'phet-lib/sun';
+import { TimerListener, stepTimer } from 'scenerystack/axon';
+import { Node, Pointer, SceneryEvent, TInputListener, Text } from 'scenerystack/scenery';
+import { Panel } from 'scenerystack/sun';
 
 export class TooltipListener implements TInputListener {
   private timerListener: TimerListener | null = null;

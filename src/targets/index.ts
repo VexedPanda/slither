@@ -1,8 +1,9 @@
-import { BooleanProperty } from 'phet-lib/axon';
-import { Bounds2, Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { Circle, Display, Node, Path } from 'phet-lib/scenery';
-import { Panel } from 'phet-lib/sun';
+import { enableAssert } from 'scenerystack/assert';
+import { BooleanProperty } from 'scenerystack/axon';
+import { Bounds2, Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { Circle, Display, Node, Path } from 'scenerystack/scenery';
+import { Panel } from 'scenerystack/sun';
 
 import { BlackEdgeFeature } from '../model/pattern/feature/BlackEdgeFeature.ts';
 import { FaceFeature } from '../model/pattern/feature/FaceFeature.ts';
@@ -35,12 +36,10 @@ import {
   getSectorsWithColorsPuzzleStyleWithTheme,
 } from '../view/puzzle/puzzleStyles.ts';
 
-// @ts-expect-error
-if (window.assertions && !import.meta.env.PROD) {
+if (!import.meta.env.PROD) {
   // TODO: We should actually... have stripped these, something is going wrong
   console.log('enabling assertions');
-  // @ts-expect-error
-  window.assertions.enableAssert();
+  enableAssert();
 }
 
 // const addDisplayToIdentifier = ( id: string, display: Display ) => {

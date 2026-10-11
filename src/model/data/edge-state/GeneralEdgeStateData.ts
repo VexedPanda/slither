@@ -8,7 +8,7 @@ import EdgeState from './EdgeState.ts';
 import { GeneralEdgeStateDelta } from './GeneralEdgeStateDelta.ts';
 import { TEdgeStateData, TSerializedEdgeStateData, serializeEdgeStateData } from './TEdgeStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

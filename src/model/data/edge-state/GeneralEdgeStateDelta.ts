@@ -6,7 +6,7 @@ import EdgeState from './EdgeState.ts';
 import { GeneralEdgeStateAction } from './GeneralEdgeStateAction.ts';
 import { TEdgeStateData, TSerializedEdgeStateData, serializeEdgeStateData } from './TEdgeStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 export class GeneralEdgeStateDelta extends GeneralEdgeStateAction implements TDelta<TEdgeStateData> {
   public readonly edgeStateChangedEmitter = new TinyEmitter<[edge: TEdge, state: EdgeState, oldState: EdgeState]>();
