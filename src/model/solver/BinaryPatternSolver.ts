@@ -1,4 +1,5 @@
 import { TBoard } from '../board/core/TBoard.ts';
+import { TEdge } from '../board/core/TEdge.ts';
 import { TFace } from '../board/core/TFace.ts';
 import { getQuickBoardSpanningFaceCount } from '../board/core/getQuickBoardSpanningFaceCount.ts';
 import { hasNonzeroSeparateFace } from '../board/core/hasNonzeroSeparateFace.ts';
@@ -8,6 +9,7 @@ import { TState } from '../data/core/TState.ts';
 import { TEdgeStateData } from '../data/edge-state/TEdgeStateData.ts';
 import { TFaceColorData } from '../data/face-color/TFaceColorData.ts';
 import { TFaceValueData } from '../data/face-value/TFaceValueData.ts';
+import { TSector } from '../data/sector-state/TSector.ts';
 import { TSectorStateData } from '../data/sector-state/TSectorStateData.ts';
 import { ActionableRuleEmbedding } from '../pattern/collection/ActionableRuleEmbedding.ts';
 import { BinaryMixedRuleGroup } from '../pattern/collection/BinaryMixedRuleGroup.ts';
@@ -38,6 +40,13 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
 
   private readonly dirtyListener: () => void;
 
+  // Kept up to date with the state (instead of being rebuilt for every action), created on first use
+  private boardFeatureData: BoardFeatureData | null = null;
+  private readonly faceValueListener: (face: TFace) => void;
+  private readonly edgeStateListener: (edge: TEdge) => void;
+  private readonly sectorStateListener: (sector: TSector) => void;
+  private readonly faceColorsListener: () => void;
+
   private readonly quickSpanningCount: number;
 
   protected constructor(
@@ -58,10 +67,27 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
       this.nextEmbeddingIndex = 0;
     };
 
-    this.state.faceValueChangedEmitter.addListener(this.dirtyListener);
-    this.state.edgeStateChangedEmitter.addListener(this.dirtyListener);
-    this.state.sectorStateChangedEmitter.addListener(this.dirtyListener);
-    this.state.faceColorsChangedEmitter.addListener(this.dirtyListener);
+    this.faceValueListener = (face) => {
+      this.boardFeatureData?.updateFaceValue(face);
+      this.dirtyListener();
+    };
+    this.edgeStateListener = (edge) => {
+      this.boardFeatureData?.updateEdge(edge);
+      this.dirtyListener();
+    };
+    this.sectorStateListener = (sector) => {
+      this.boardFeatureData?.updateSector(sector);
+      this.dirtyListener();
+    };
+    this.faceColorsListener = () => {
+      this.boardFeatureData?.updateFaceColors();
+      this.dirtyListener();
+    };
+
+    this.state.faceValueChangedEmitter.addListener(this.faceValueListener);
+    this.state.edgeStateChangedEmitter.addListener(this.edgeStateListener);
+    this.state.sectorStateChangedEmitter.addListener(this.sectorStateListener);
+    this.state.faceColorsChangedEmitter.addListener(this.faceColorsListener);
   }
 
   public get dirty(): boolean {
@@ -73,7 +99,7 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
       return null;
     }
 
-    const boardFeatureData = new BoardFeatureData(this.boardPatternBoard, this.state);
+    const boardFeatureData = (this.boardFeatureData ??= new BoardFeatureData(this.boardPatternBoard, this.state));
 
     while (true) {
       const match = this.binaryData.getNext(
@@ -129,10 +155,10 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
   }
 
   public dispose(): void {
-    this.state.faceValueChangedEmitter.removeListener(this.dirtyListener);
-    this.state.edgeStateChangedEmitter.removeListener(this.dirtyListener);
-    this.state.sectorStateChangedEmitter.removeListener(this.dirtyListener);
-    this.state.faceColorsChangedEmitter.removeListener(this.dirtyListener);
+    this.state.faceValueChangedEmitter.removeListener(this.faceValueListener);
+    this.state.edgeStateChangedEmitter.removeListener(this.edgeStateListener);
+    this.state.sectorStateChangedEmitter.removeListener(this.sectorStateListener);
+    this.state.faceColorsChangedEmitter.removeListener(this.faceColorsListener);
   }
 
   public static fromGroup(
