@@ -14,7 +14,7 @@
     "culori": "~4.0.1",
     "pako": "~3.0.2",
     "phet-lib": "0.0.12",
-    "tesseract.js": "~5.0.4"
+    "tesseract.js": "~7.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",

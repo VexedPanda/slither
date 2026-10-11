@@ -38,13 +38,19 @@ const scanFaceValues = async (url: string, providedOptions?: scanFaceValuesOptio
     }[options.segmentation], // see https://github.com/tesseract-ocr/tesseract/blob/4.0.0/src/ccstruct/publictypes.h#L163
   });
 
-  const result = await worker.recognize(url);
+  // Since tesseract.js v6, only `text` is returned by default; request `blocks` to get symbol-level output
+  const result = await worker.recognize(url, {}, { blocks: true });
 
   // TODO: we... terminate sometime?
   // await worker.terminate();
 
   // NOTE: don't have a typed version of this metadata from Tesseract.js at the moment
-  return result.data.symbols /*.filter( ( symbol: any ) => [ '0', '1', '2', '3' ].includes( symbol.text ) )*/
+  const symbols = (result.data.blocks ?? []).flatMap((block: any) =>
+    block.paragraphs.flatMap((paragraph: any) =>
+      paragraph.lines.flatMap((line: any) => line.words.flatMap((word: any) => word.symbols)),
+    ),
+  );
+  return symbols /*.filter( ( symbol: any ) => [ '0', '1', '2', '3' ].includes( symbol.text ) )*/
     .map((symbol: any) => {
       return new ScannedFaceValue(
         symbol.text,
