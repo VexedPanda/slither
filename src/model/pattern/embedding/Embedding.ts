@@ -10,6 +10,12 @@ export class Embedding {
   public readonly isAutomorphism: boolean;
   public readonly isIdentityAutomorphism: boolean;
 
+  // Target indices, indexed by source index. Faster than the maps for hot pattern matching.
+  public readonly mappedFaceIndices: number[] = [];
+  public readonly mappedNonExitEdgeIndices: number[] = [];
+  public readonly mappedExitEdgeIndices: number[][] = [];
+  public readonly mappedSectorIndices: number[] = [];
+
   // Defined if it is an automorphism
   private readonly vertexInverseMap?: Map<TPatternVertex, TPatternVertex>;
   private readonly edgeInverseMap?: Map<TPatternEdge, TPatternEdge>;
@@ -27,6 +33,19 @@ export class Embedding {
     private readonly faceMap: Map<TPatternFace, TPatternFace>,
   ) {
     this.isAutomorphism = sourcePatternBoard === targetPatternBoard;
+
+    for (const [face, mappedFace] of faceMap) {
+      this.mappedFaceIndices[face.index] = mappedFace.index;
+    }
+    for (const [edge, mappedEdge] of nonExitEdgeMap) {
+      this.mappedNonExitEdgeIndices[edge.index] = mappedEdge.index;
+    }
+    for (const [edge, mappedEdges] of exitEdgeMap) {
+      this.mappedExitEdgeIndices[edge.index] = mappedEdges.map((mappedEdge) => mappedEdge.index);
+    }
+    for (const [sector, mappedSector] of sectorMap) {
+      this.mappedSectorIndices[sector.index] = mappedSector.index;
+    }
 
     if (this.isAutomorphism) {
       this.vertexInverseMap = new Map(Array.from(vertexMap).map(([key, value]) => [value, key]));
