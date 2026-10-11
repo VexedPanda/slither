@@ -1,4 +1,5 @@
 import { sleep } from './sleep.ts';
+import { yieldToEventLoop } from './yieldToEventLoop.ts';
 
 import { TReadOnlyProperty } from 'phet-lib/axon';
 
@@ -10,7 +11,7 @@ export const interruptableSleep = async function (
   milliseconds: number,
   interruptedProperty: TReadOnlyProperty<boolean>,
 ) {
-  await sleep(milliseconds);
+  await (milliseconds === 0 ? yieldToEventLoop() : sleep(milliseconds));
   debugSleep && console.log('after sleep before interrupt check');
 
   if (interruptedProperty.value) {

@@ -3,7 +3,7 @@ import { getEmbeddings } from '../embedding/getEmbeddings.ts';
 import { FeatureSet } from '../feature/FeatureSet.ts';
 import FeatureSetMatchState from '../feature/FeatureSetMatchState.ts';
 import { TBoardFeatureData } from '../feature/TBoardFeatureData.ts';
-import { getBinaryFeatureMapping } from '../generation/BinaryFeatureMapping.ts';
+import { BinaryFeatureMapping, getBinaryFeatureMapping } from '../generation/BinaryFeatureMapping.ts';
 import { TPatternBoard } from '../pattern-board/TPatternBoard.ts';
 import { deserializePatternBoard } from '../pattern-board/deserializePatternBoard.ts';
 import { serializePatternBoard } from '../pattern-board/serializePatternBoard.ts';
@@ -56,6 +56,7 @@ export class BinaryRuleCollection {
     this.highlander ||= rule.highlander;
     this.data.set(addedBytes, this.nextRuleIndex);
     this.ruleIndices.push(this.nextRuleIndex);
+    this.ruleHasFaceColorFeaturesCache = null;
     this.nextRuleIndex += addedBytes.length;
   }
 
@@ -78,6 +79,7 @@ export class BinaryRuleCollection {
     this.highlander ||= isHighlander;
     this.data.set(addedBytes, this.nextRuleIndex);
     this.ruleIndices.push(this.nextRuleIndex);
+    this.ruleHasFaceColorFeaturesCache = null;
     this.nextRuleIndex += addedBytes.length;
   }
 
@@ -372,13 +374,7 @@ export class BinaryRuleCollection {
     highlanderOverride?: (ruleIndex: number) => boolean,
     maxRules = this.size,
   ): ActionableRuleEmbedding | null {
-    let count = 0;
     for (let ruleIndex = initialRuleIndex; ruleIndex < maxRules; ruleIndex++) {
-      if (count % 1000 === 0) {
-        console.log('search', count);
-      }
-      count++;
-
       const byteIndex = this.ruleIndices[ruleIndex];
       const patternBoardIndex = this.data[byteIndex];
       const patternBoard = this.patternBoards[patternBoardIndex];
@@ -424,6 +420,49 @@ export class BinaryRuleCollection {
     return null;
   }
 
+  // One step of findNextActionableEmbeddedRuleFromData: the actionable embedded rule for one embedding, undefined if it
+  // is not actionable, or null in the degenerate case where findNextActionableEmbeddedRuleFromData stops with null.
+  public getActionableEmbeddedRuleFromData(
+    targetPatternBoard: TPatternBoard,
+    boardData: TBoardFeatureData,
+    ruleIndex: number,
+    embedding: Embedding,
+    embeddingIndex: number,
+    highlanderOverride?: (ruleIndex: number) => boolean,
+  ): ActionableRuleEmbedding | null | undefined {
+    if (!this.isActionableEmbeddingFromData(targetPatternBoard, boardData, ruleIndex, embedding)) {
+      return undefined;
+    }
+
+    const rule = highlanderOverride ? this.getRule(ruleIndex, highlanderOverride(ruleIndex)) : this.getRule(ruleIndex);
+    const embeddedRule = rule.embedded(targetPatternBoard, embedding);
+
+    return embeddedRule ? new ActionableRuleEmbedding(ruleIndex, embeddingIndex, rule, embeddedRule, embedding) : null;
+  }
+
+  // Whether the rule has face color (dual) features, which can change from face color changes anywhere on the board
+  public ruleHasFaceColorFeatures(ruleIndex: number): boolean {
+    if (!this.ruleHasFaceColorFeaturesCache) {
+      this.ruleHasFaceColorFeaturesCache = this.ruleIndices.map((byteIndex) => {
+        // Skip the pattern board byte, then look through the input and output sections (each ending with 0xff).
+        // 0xfe can only appear as the start of a face color dual section.
+        let sectionEndCount = 0;
+        for (let i = byteIndex + 1; sectionEndCount < 2; i++) {
+          if (this.data[i] === 0xfe) {
+            return true;
+          } else if (this.data[i] === 0xff) {
+            sectionEndCount++;
+          }
+        }
+        return false;
+      });
+    }
+    return this.ruleHasFaceColorFeaturesCache[ruleIndex];
+  }
+
+  private ruleHasFaceColorFeaturesCache: boolean[] | null = null;
+  private readonly binaryMappingCache: (BinaryFeatureMapping | undefined)[] = [];
+
   public isActionableEmbeddingFromData(
     targetPatternBoard: TPatternBoard,
     boardData: TBoardFeatureData,
@@ -435,7 +474,8 @@ export class BinaryRuleCollection {
     const patternBoard = this.patternBoards[patternBoardIndex];
     // assertEnabled() && assert(patternBoard, 'pattern board');
 
-    const binaryMapping = getBinaryFeatureMapping(patternBoard);
+    // Cached per pattern board index, since this is the hot path for solving
+    const binaryMapping = (this.binaryMappingCache[patternBoardIndex] ??= getBinaryFeatureMapping(patternBoard));
 
     // Input features, filter by the "input" of the pattern
     while (true) {
@@ -460,11 +500,10 @@ export class BinaryRuleCollection {
           if (nextByte & 0x80) {
             const secondaryFaceIndex = nextByte & 0x7f;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const secondaryColorFromFirstPrimary =
-              boardData.oppositeFaceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.oppositeFaceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const secondaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[secondaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[secondaryFaceIndex].index]];
 
             if (secondaryColorFromFirstPrimary !== secondaryColorDirect) {
               return false;
@@ -472,11 +511,10 @@ export class BinaryRuleCollection {
           } else {
             const primaryFaceIndex = nextByte;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const primaryColorFromFirstPrimary =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const primaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[primaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[primaryFaceIndex].index]];
 
             if (primaryColorFromFirstPrimary !== primaryColorDirect) {
               return false;
@@ -516,11 +554,10 @@ export class BinaryRuleCollection {
           if (nextByte & 0x80) {
             const secondaryFaceIndex = nextByte & 0x7f;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const secondaryColorFromFirstPrimary =
-              boardData.oppositeFaceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.oppositeFaceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const secondaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[secondaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[secondaryFaceIndex].index]];
 
             if (secondaryColorFromFirstPrimary !== secondaryColorDirect) {
               return true;
@@ -528,11 +565,10 @@ export class BinaryRuleCollection {
           } else {
             const primaryFaceIndex = nextByte;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const primaryColorFromFirstPrimary =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const primaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[primaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[primaryFaceIndex].index]];
 
             if (primaryColorFromFirstPrimary !== primaryColorDirect) {
               return true;

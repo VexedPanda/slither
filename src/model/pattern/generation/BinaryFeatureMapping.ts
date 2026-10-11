@@ -31,7 +31,7 @@ export class BinaryFeatureMapping {
       for (const value of potentialValues) {
         this.featureArray.push(new FaceFeature(face, value));
         this.featureMatchers.push((data, embedding) => {
-          const targetValue = data.faceValues[embedding.mapFace(face).index];
+          const targetValue = data.faceValues[embedding.mappedFaceIndices[face.index]];
 
           return targetValue === value ? FeatureSetMatchState.MATCH : FeatureSetMatchState.INCOMPATIBLE;
         });
@@ -48,13 +48,10 @@ export class BinaryFeatureMapping {
       this.featureArray.push(new RedEdgeFeature(edge));
       this.featureMatchers.push((data, embedding) => {
         if (edge.isExit) {
-          // TODO: index mappings
-          const edges = embedding.mapExitEdges(edge);
+          const indices = embedding.mappedExitEdgeIndices[edge.index];
 
           let allMatched = true;
-          for (const edge of edges) {
-            const index = edge.index;
-
+          for (const index of indices) {
             const isRed = data.redEdgeValues[index];
 
             if (isRed) {
@@ -72,7 +69,7 @@ export class BinaryFeatureMapping {
 
           return allMatched ? FeatureSetMatchState.MATCH : FeatureSetMatchState.DORMANT;
         } else {
-          const index = embedding.mapNonExitEdge(edge).index;
+          const index = embedding.mappedNonExitEdgeIndices[edge.index];
 
           const isRed = data.redEdgeValues[index];
 
@@ -134,7 +131,7 @@ export class BinaryFeatureMapping {
       if (!edge.isExit) {
         this.featureArray.push(new BlackEdgeFeature(edge));
         this.featureMatchers.push((data, embedding) => {
-          const index = embedding.mapNonExitEdge(edge).index;
+          const index = embedding.mappedNonExitEdgeIndices[edge.index];
 
           const isBlack = data.blackEdgeValues[index];
 
@@ -174,7 +171,7 @@ export class BinaryFeatureMapping {
       this.featureArray.push(new SectorNotZeroFeature(sector));
       this.featureMatchers.push((data, embedding) => {
         // TODO: potentially improve compatibility check
-        return data.sectorNotZeroValues[embedding.mapSector(sector).index] ?
+        return data.sectorNotZeroValues[embedding.mappedSectorIndices[sector.index]] ?
             FeatureSetMatchState.MATCH
           : FeatureSetMatchState.DORMANT;
       });
@@ -187,7 +184,7 @@ export class BinaryFeatureMapping {
       this.featureArray.push(new SectorNotOneFeature(sector));
       this.featureMatchers.push((data, embedding) => {
         // TODO: potentially improve compatibility check
-        return data.sectorNotOneValues[embedding.mapSector(sector).index] ?
+        return data.sectorNotOneValues[embedding.mappedSectorIndices[sector.index]] ?
             FeatureSetMatchState.MATCH
           : FeatureSetMatchState.DORMANT;
       });
@@ -200,7 +197,7 @@ export class BinaryFeatureMapping {
       this.featureArray.push(new SectorNotTwoFeature(sector));
       this.featureMatchers.push((data, embedding) => {
         // TODO: potentially improve compatibility check
-        return data.sectorNotTwoValues[embedding.mapSector(sector).index] ?
+        return data.sectorNotTwoValues[embedding.mappedSectorIndices[sector.index]] ?
             FeatureSetMatchState.MATCH
           : FeatureSetMatchState.DORMANT;
       });
@@ -214,7 +211,7 @@ export class BinaryFeatureMapping {
       this.featureArray.push(new SectorOnlyOneFeature(sector));
       this.featureMatchers.push((data, embedding) => {
         // TODO: potentially improve compatibility check
-        return data.sectorOnlyOneValues[embedding.mapSector(sector).index] ?
+        return data.sectorOnlyOneValues[embedding.mappedSectorIndices[sector.index]] ?
             FeatureSetMatchState.MATCH
           : FeatureSetMatchState.DORMANT;
       });

@@ -6,9 +6,10 @@ import { CompleteData } from '../data/combined/CompleteData.ts';
 import { TCompleteData } from '../data/combined/TCompleteData.ts';
 import { TState } from '../data/core/TState.ts';
 import FaceValue from '../data/face-value/FaceValue.ts';
-import { satSolve } from '../solver/SATSolver.ts';
+import { incrementalSatSolve } from '../solver/IncrementalSATSolver.ts';
 import { MaximumSolverIterationsError } from '../solver/errors/MaximumSolverIterationsError.ts';
 import { MultipleSolutionsError } from '../solver/errors/MultipleSolutionsError.ts';
+import { KnownSolutions } from './KnownSolutions.ts';
 import { TSolvedPuzzle } from './TSolvedPuzzle.ts';
 import { getSolvedPuzzle } from './getSolvedPuzzle.ts';
 
@@ -30,6 +31,8 @@ export const generateFaceAdditive = async (
   interruptedProperty?: TReadOnlyProperty<boolean>,
   faceProcessedEmitter?: TEmitter<[index: number, state: FaceValue]>,
 ): Promise<TSolvedPuzzle<TStructure, TCompleteData>> => {
+  const knownSolutions = KnownSolutions.get(board);
+
   let iterations = 0;
   while (iterations++ < 100) {
     const state = CompleteData.fromFaces(board, () => null);
@@ -41,15 +44,22 @@ export const generateFaceAdditive = async (
 
     // A simplified 0,1,2 count (2 means multiple)
     const getSolutionCount = (state: TState<TCompleteData>) => {
+      // Skip the SAT solve if loops we've already found show multiple solutions
+      if (knownSolutions.hasMultipleSolutions(state)) {
+        return 2;
+      }
+
       try {
         // TODO: try to invoke our normal solver first? (could increase or decrease performance)
-        solutions = satSolve(board, state, {
+        solutions = incrementalSatSolve(board, state, {
           maxIterations: 10000,
           failOnMultipleSolutions: true,
         });
+        knownSolutions.add(solutions);
         return solutions.length;
       } catch (e) {
         if (e instanceof MultipleSolutionsError) {
+          knownSolutions.add(e.solutionEdges);
           return 2;
         } else if (e instanceof MaximumSolverIterationsError) {
           // TODO: is this overly safe? If we max out on iterations, don't add it. Hmm.
