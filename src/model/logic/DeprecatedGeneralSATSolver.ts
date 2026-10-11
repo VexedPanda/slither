@@ -73,7 +73,7 @@ export class DeprecatedGeneralSATSolver {
 
   private unitPropagate(literal: number): boolean {
     const watchList = this.watches.get(-literal) || [];
-    for (let i = 0; i < watchList.length; ) {
+    for (let i = 0; i < watchList.length;) {
       const clause = this.clauses[watchList[i]];
       const otherLiteral = clause.literals.find((l) => l !== -literal && !this.isAssigned(Math.abs(l)));
       if (otherLiteral === undefined) {

@@ -18,9 +18,10 @@ export type SimpleFaceSolverOptions = {
   solveToBlack: boolean;
 };
 
-export class SimpleFaceSolver
-  implements TSolver<TFaceValueData & TEdgeStateData, TAnnotatedAction<TFaceValueData & TEdgeStateData>>
-{
+export class SimpleFaceSolver implements TSolver<
+  TFaceValueData & TEdgeStateData,
+  TAnnotatedAction<TFaceValueData & TEdgeStateData>
+> {
   private readonly dirtyFaces: TFace[] = [];
 
   private readonly faceListener: TFaceValueListener;

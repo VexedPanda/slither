@@ -684,7 +684,7 @@ export const puzzleStyleProperty = new LocalStorageProperty<TPuzzleStyle>('puzzl
   serialize: (style) =>
     Object.keys(puzzleStyleMap).find((key) => puzzleStyleMap[key as keyof typeof puzzleStyleMap] === style)!,
   deserialize: (name) =>
-    name ? puzzleStyleMap[name as keyof typeof puzzleStyleMap] ?? defaultPuzzleStyle : defaultPuzzleStyle,
+    name ? (puzzleStyleMap[name as keyof typeof puzzleStyleMap] ?? defaultPuzzleStyle) : defaultPuzzleStyle,
 });
 
 export const currentPuzzleStyle: TPuzzleStyle = puzzleStyleFromProperty(puzzleStyleProperty);

@@ -22,7 +22,8 @@ import {
 import { TAnyData } from './TAnyData.ts';
 
 export interface TCompleteData
-  extends TFaceValueData,
+  extends
+    TFaceValueData,
     TEdgeStateData,
     TSimpleRegionData,
     TFaceColorData,

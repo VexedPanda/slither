@@ -21,13 +21,10 @@ export type SimpleLoopSolverOptions = {
   resolveAllRegions: boolean;
 };
 
-export class SimpleLoopSolver
-  implements
-    TSolver<
-      TFaceValueData & TEdgeStateData & TSimpleRegionData,
-      TAnnotatedAction<TFaceValueData & TEdgeStateData & TSimpleRegionData>
-    >
-{
+export class SimpleLoopSolver implements TSolver<
+  TFaceValueData & TEdgeStateData & TSimpleRegionData,
+  TAnnotatedAction<TFaceValueData & TEdgeStateData & TSimpleRegionData>
+> {
   private readonly dirtySimpleRegions: Set<TSimpleRegion>;
   private hasDirtyWeirdEdges: boolean = false;
 
