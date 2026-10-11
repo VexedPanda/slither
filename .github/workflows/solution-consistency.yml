@@ -3,13 +3,8 @@
 name: Solution consistency
 
 on:
+  # Every pull request, since this is a required check (a path filter would leave unrelated PRs waiting on it)
   pull_request:
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'vite.config.js'
-      - '.github/consistency/**'
-      - '.github/workflows/solution-consistency.yml'
   workflow_dispatch:
     inputs:
       base:
