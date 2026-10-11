@@ -21,12 +21,16 @@ export class DeprecatedGeneralSolver {
   private readonly watchedClauseIndicesByLiteral: Map<Variable, ClauseIndex[]> = new Map(); // literal_watch
   private readonly watchedLiteralsByClauseIndex: Variable[][] = []; // clauses_literal_watched
 
-  private restartProbability: number = 0.9; // probability
-  private restartCount: number = 0;
-
   public constructor(initialClauses: Clause[], numVariables?: number) {
     // Defensive copy, since we want to modify these
     this.clauses = initialClauses.map((clause) => clause.slice());
+
+    if (!numVariables) {
+      numVariables = Math.max(...this.clauses.map((clause) => Math.max(...clause.map((v) => Math.abs(v)))));
+    }
+
+    this.numVariables = numVariables;
+    this.possibleLiterals = _.sortBy(_.range(1, this.numVariables + 1).flatMap((v) => [v, -v]));
 
     const assignments = DeprecatedGeneralSolver.unitPropagation(this.clauses);
 
@@ -38,16 +42,8 @@ export class DeprecatedGeneralSolver {
     this.initialAssignments.push(...assignments);
     this.assignments.push(...assignments);
 
-    if (!numVariables) {
-      numVariables = Math.max(...this.clauses.map((clause) => Math.max(...clause.map((v) => Math.abs(v)))));
-    }
-
-    this.numVariables = numVariables;
-    this.possibleLiterals = _.sortBy(_.range(1, this.numVariables + 1).flatMap((v) => [v, -v]));
-
     this.resetVSIDS();
     this.resetWatchedLiterals();
-    this.resetProbability();
 
     while (this.assignments.length < this.numVariables) {
       const variable = this.getVSIDSVariable();
@@ -62,7 +58,7 @@ export class DeprecatedGeneralSolver {
         const learnedClause = this.analyzeConflict(conflictClause);
 
         // TODO: is this... JUST NOT USED WTF
-        let declareLevel = this.addLearnedClauseTo(learnedClause);
+        this.addLearnedClauseTo(learnedClause);
 
         // jump_status
         // var
@@ -106,10 +102,6 @@ export class DeprecatedGeneralSolver {
       this.watchedClauseIndicesByLiteral.get(watchedLiterals[0])!.push(clauseIndex);
       this.watchedClauseIndicesByLiteral.get(watchedLiterals[1])!.push(clauseIndex);
     }
-  }
-
-  private resetProbability(): void {
-    this.restartProbability = 0.9;
   }
 
   // returns conflict or null
@@ -193,26 +185,6 @@ export class DeprecatedGeneralSolver {
     }
 
     return null;
-  }
-
-  private potentialRandomRestart(): void {
-    if (this.restartProbability && Math.random() < this.restartProbability) {
-      this.restartCount++;
-
-      this.assignments.length = 0;
-      this.assignments.push(...this.initialAssignments);
-
-      this.decisionLevels.length = 0;
-      this.restartProbability *= 0.5;
-
-      if (this.restartProbability < 0.001) {
-        this.restartProbability = 0.2;
-      }
-      if (this.restartCount > this.assignments.length + 10) {
-        // TODO: potentially adjust this?
-        this.restartProbability = 0;
-      }
-    }
   }
 
   private analyzeConflict(conflictClause: Clause): Clause {

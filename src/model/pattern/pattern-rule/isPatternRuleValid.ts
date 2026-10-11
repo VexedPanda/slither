@@ -1,4 +1,4 @@
-import { HighlanderPruner } from '../formal-concept/HighlanderPruner.ts';
+import { Highlander } from '../highlander/Highlander.ts';
 import { GenericRichSolution } from '../solve/GenericRichSolution.ts';
 import { getPatternBoardGenericRichSolutions } from '../solve/getPatternBoardGenericRichSolutions.ts';
 import { PatternRule } from './PatternRule.ts';
@@ -18,7 +18,7 @@ export const isPatternRuleValid = (
 
   // Highlander filter
   if (highlander) {
-    inputSolutions = HighlanderPruner.filterWithFeatureSet(inputSolutions, patternRule.inputFeatureSet);
+    inputSolutions = Highlander.filterWithFeatureSet(inputSolutions, patternRule.inputFeatureSet);
   }
 
   // Input feature filter

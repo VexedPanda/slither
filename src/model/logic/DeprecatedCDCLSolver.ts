@@ -10,7 +10,6 @@ interface CDCLAssignment {
 class DeprecatedCDCLSATSolver {
   private clauses: CDCLClause[];
   private numVar: number;
-  private numClauses: number;
   private assignment: CDCLAssignment[];
   private decidePos: number[];
   private counter: Map<number, number>;
@@ -18,15 +17,14 @@ class DeprecatedCDCLSATSolver {
   private clausesLiteralWatched: number[][];
   private probability: number;
   private back: CDCLAssignment[];
-  private restartCount: number;
-  private learnedCount: number;
-  private decideCount: number;
-  private impCount: number;
+  public restartCount: number;
+  public learnedCount: number;
+  public decideCount: number;
+  public impCount: number;
 
-  constructor(clauses: CDCLClause[], numVar: number) {
+  public constructor(clauses: CDCLClause[], numVar: number) {
     this.clauses = clauses;
     this.numVar = numVar;
-    this.numClauses = clauses.length;
     this.assignment = [];
     this.decidePos = [];
     this.counter = this.VSIDSInit(clauses, numVar);
@@ -186,17 +184,6 @@ class DeprecatedCDCLSATSolver {
     }
   }
 
-  private verify(): boolean {
-    for (const clause of this.clauses) {
-      if (
-        !clause.literals.some((lit) => this.assignment.some((a) => a.variable === Math.abs(lit) && a.value === lit > 0))
-      ) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   private analyzeConflict(conflict: CDCLClause): CDCLClause {
     const learn: number[] = [];
     for (const pos of this.decidePos) {
@@ -223,7 +210,7 @@ class DeprecatedCDCLSATSolver {
       const variable = this.VSIDSDecide(this.counter, this.assignment, this.numVar);
       this.decideCount += 1;
       this.assign(variable);
-      let [conflict, literalWatch] = this.twoWatchPropagate(variable);
+      let [conflict] = this.twoWatchPropagate(variable);
       while (conflict) {
         this.VSIDSConflict(this.counter, conflict);
         this.VSIDSDecay(this.counter, this.numVar);
@@ -240,7 +227,7 @@ class DeprecatedCDCLSATSolver {
         }
         this.assignment.push({ variable: Math.abs(varBack), value: varBack > 0 });
         this.randomRestart();
-        [conflict, literalWatch] = this.twoWatchPropagate(varBack);
+        [conflict] = this.twoWatchPropagate(varBack);
       }
     }
     return this.assignment;

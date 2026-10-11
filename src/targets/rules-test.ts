@@ -128,7 +128,7 @@ console.log('test');
   //  15   16  0`, solver );
   const isSat = solver.solve();
   console.log('isSat', isSat);
-  console.log(solver.model.data);
+  console.log([...solver.model]);
 
   debugger;
 
