@@ -56,6 +56,7 @@ export class BinaryRuleCollection {
     this.highlander ||= rule.highlander;
     this.data.set(addedBytes, this.nextRuleIndex);
     this.ruleIndices.push(this.nextRuleIndex);
+    this.ruleHasFaceColorFeaturesCache = null;
     this.nextRuleIndex += addedBytes.length;
   }
 
@@ -78,6 +79,7 @@ export class BinaryRuleCollection {
     this.highlander ||= isHighlander;
     this.data.set(addedBytes, this.nextRuleIndex);
     this.ruleIndices.push(this.nextRuleIndex);
+    this.ruleHasFaceColorFeaturesCache = null;
     this.nextRuleIndex += addedBytes.length;
   }
 
@@ -129,6 +131,48 @@ export class BinaryRuleCollection {
   public getRulePatternBoard(ruleIndex: number): TPatternBoard {
     return this.patternBoards[this.data[this.ruleIndices[ruleIndex]]];
   }
+
+  // One step of findNextActionableEmbeddedRuleFromData: the actionable embedded rule for one embedding, undefined if it
+  // is not actionable, or null in the degenerate case where findNextActionableEmbeddedRuleFromData stops with null.
+  public getActionableEmbeddedRuleFromData(
+    targetPatternBoard: TPatternBoard,
+    boardData: TBoardFeatureData,
+    ruleIndex: number,
+    embedding: Embedding,
+    embeddingIndex: number,
+    highlanderOverride?: (ruleIndex: number) => boolean,
+  ): ActionableRuleEmbedding | null | undefined {
+    if (!this.isActionableEmbeddingFromData(targetPatternBoard, boardData, ruleIndex, embedding)) {
+      return undefined;
+    }
+
+    const rule = highlanderOverride ? this.getRule(ruleIndex, highlanderOverride(ruleIndex)) : this.getRule(ruleIndex);
+    const embeddedRule = rule.embedded(targetPatternBoard, embedding);
+
+    return embeddedRule ? new ActionableRuleEmbedding(ruleIndex, embeddingIndex, rule, embeddedRule, embedding) : null;
+  }
+
+  // Whether the rule has face color (dual) features, which can change from face color changes anywhere on the board
+  public ruleHasFaceColorFeatures(ruleIndex: number): boolean {
+    if (!this.ruleHasFaceColorFeaturesCache) {
+      this.ruleHasFaceColorFeaturesCache = this.ruleIndices.map((byteIndex) => {
+        // Skip the pattern board byte, then look through the input and output sections (each ending with 0xff).
+        // 0xfe can only appear as the start of a face color dual section.
+        let sectionEndCount = 0;
+        for (let i = byteIndex + 1; sectionEndCount < 2; i++) {
+          if (this.data[i] === 0xfe) {
+            return true;
+          } else if (this.data[i] === 0xff) {
+            sectionEndCount++;
+          }
+        }
+        return false;
+      });
+    }
+    return this.ruleHasFaceColorFeaturesCache[ruleIndex];
+  }
+
+  private ruleHasFaceColorFeaturesCache: boolean[] | null = null;
 
   public forEachRule(callback: (rule: PatternRule) => void): void {
     for (let i = 0; i < this.ruleIndices.length; i++) {
