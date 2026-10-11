@@ -7,10 +7,12 @@ import SlitherQueryParameters from '../SlitherQueryParameters.ts';
 
 import _ from '../workarounds/_';
 
-export const cvReady = new Promise((resolve) => {
-  // @ts-expect-error
-  cv.onRuntimeInitialized = resolve;
-});
+// @techstark/opencv-js 5 exports a Promise that resolves to the initialized module (instead of a module object with
+// onRuntimeInitialized). Copy the module onto the imported object so the existing `cv.*` usages keep working.
+export const cvReady: Promise<void> = (async () => {
+  const cvModule = await (cv as unknown as Promise<typeof cv>);
+  Object.assign(cv, cvModule);
+})();
 
 export const withMat = (f: (mat: cv.Mat) => void): cv.Mat => {
   const mat = new cv.Mat();
