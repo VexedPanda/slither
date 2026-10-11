@@ -37,6 +37,6 @@
     "svgo": "~4.1.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "~8.71.1",
-    "vite": "^6.4.4"
+    "vite": "^7.3.7"
   }
 }
