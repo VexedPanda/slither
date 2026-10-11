@@ -41,7 +41,26 @@ export type BinaryPatternSolverData = {
   ) => ActionableRuleEmbedding | null | undefined;
 
   ruleHasFaceColorFeatures: (ruleIndex: number) => boolean;
+
+  // Shared between solvers for the same rules (see loadSnapshot)
+  snapshots: Map<BoardPatternBoard, ScanSnapshot>;
 };
+
+// What a solver knew after its first full scan, and the feature data it was for
+type ScanSnapshot = {
+  verifiedCounts: number[];
+  exceptionLists: number[][];
+  faceValues: TBoardFeatureData['faceValues'];
+  redEdgeValues: boolean[];
+  blackEdgeValues: boolean[];
+  sectorNotZeroValues: boolean[];
+  sectorNotOneValues: boolean[];
+  sectorNotTwoValues: boolean[];
+  sectorOnlyOneValues: boolean[];
+};
+
+// Snapshots for each group and size (number of rules used)
+const groupSnapshotsMap = new WeakMap<BinaryMixedRuleGroup, Map<number, Map<BoardPatternBoard, ScanSnapshot>>>();
 
 // Change log entries: the kind of changed element, combined with its index (in the board pattern board)
 const FACE_CHANGE = 0;
@@ -80,6 +99,7 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
   private changeLog: number[] = [];
   private readonly faceColorRuleIndices: number[] = [];
   private readonly ruleEmbeddings: (Embedding[] | undefined)[] = [];
+  private hasScanned = false;
 
   private readonly quickSpanningCount: number;
 
@@ -188,6 +208,10 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
     this.compactChangeLog();
 
     this.touchedCache.clear();
+
+    if (!this.hasScanned && startRuleIndex === 0 && startEmbeddingIndex === 0) {
+      return this.findFirstMatch(boardFeatureData);
+    }
 
     for (let ruleIndex = startRuleIndex; ruleIndex < this.binaryData.size; ruleIndex++) {
       const embeddings = this.getRuleEmbeddings(ruleIndex);
@@ -354,6 +378,133 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
     return candidates;
   }
 
+  // The first scan of a solver. Consecutive solvers (e.g. difficulty checks during generation) usually start from
+  // similar states, so we start from what the last solver for the same rules knew after its first scan (if any),
+  // treating every difference in the feature data as a change. We then check everything (instead of stopping at the
+  // first match), so that every rule is verified and we can save that knowledge for the next solver. Everything gets
+  // checked at least once during a solver's lifetime anyway.
+  private findFirstMatch(boardFeatureData: BoardFeatureData): ActionableRuleEmbedding | null {
+    this.hasScanned = true;
+    this.loadSnapshot(boardFeatureData);
+
+    let firstMatch: ActionableRuleEmbedding | null = null;
+
+    for (let ruleIndex = 0; ruleIndex < this.binaryData.size; ruleIndex++) {
+      const embeddings = this.getRuleEmbeddings(ruleIndex);
+      const candidates = this.getCandidates(ruleIndex, embeddings);
+
+      const newExceptions: number[] = [];
+      const checkEmbedding = (embeddingIndex: number): boolean => {
+        const match = this.binaryData.getActionable(
+          this.boardPatternBoard,
+          boardFeatureData,
+          ruleIndex,
+          embeddings[embeddingIndex],
+          embeddingIndex,
+        );
+
+        if (match === undefined) {
+          return true;
+        } else if (match === null) {
+          // Degenerate: if it comes before the first match, the original scan would stop here
+          if (!firstMatch) {
+            return false;
+          }
+        } else if (!firstMatch && this.hasSeparateFace(match)) {
+          firstMatch = match;
+        }
+
+        // Every other actionable embedding is an exception (to re-check later)
+        newExceptions.push(embeddingIndex);
+        return true;
+      };
+
+      for (const embeddingIndex of candidates) {
+        if (!checkEmbedding(embeddingIndex)) {
+          return this.finishDegenerate();
+        }
+      }
+      for (let embeddingIndex = this.verifiedCounts[ruleIndex]; embeddingIndex < embeddings.length; embeddingIndex++) {
+        if (!checkEmbedding(embeddingIndex)) {
+          return this.finishDegenerate();
+        }
+      }
+
+      this.exceptionLists[ruleIndex] = newExceptions;
+      this.verifiedCounts[ruleIndex] = embeddings.length;
+      this.logIndices[ruleIndex] = this.changeLog.length;
+    }
+
+    this.saveSnapshot(boardFeatureData);
+
+    if (firstMatch) {
+      return this.finishMatch(firstMatch);
+    } else {
+      this.nextRuleIndex = this.binaryData.size;
+      this.nextEmbeddingIndex = 0;
+      return null;
+    }
+  }
+
+  private loadSnapshot(boardFeatureData: BoardFeatureData): void {
+    const snapshot = this.binaryData.snapshots.get(this.boardPatternBoard);
+    if (!snapshot) {
+      return;
+    }
+
+    for (let ruleIndex = 0; ruleIndex < this.binaryData.size; ruleIndex++) {
+      this.verifiedCounts[ruleIndex] = snapshot.verifiedCounts[ruleIndex];
+      this.exceptionLists[ruleIndex] = snapshot.exceptionLists[ruleIndex].slice();
+      this.logIndices[ruleIndex] = this.changeLog.length;
+    }
+
+    // Face colors aren't comparable between states
+    for (const ruleIndex of this.faceColorRuleIndices) {
+      this.verifiedCounts[ruleIndex] = 0;
+      this.exceptionLists[ruleIndex] = [];
+    }
+
+    // Every difference counts as a change
+    for (let i = 0; i < snapshot.faceValues.length; i++) {
+      if (snapshot.faceValues[i] !== boardFeatureData.faceValues[i]) {
+        this.changeLog.push(FACE_CHANGE * CHANGE_KIND_MULTIPLIER + i);
+      }
+    }
+    for (let i = 0; i < snapshot.redEdgeValues.length; i++) {
+      if (
+        snapshot.redEdgeValues[i] !== boardFeatureData.redEdgeValues[i] ||
+        snapshot.blackEdgeValues[i] !== boardFeatureData.blackEdgeValues[i]
+      ) {
+        this.changeLog.push(EDGE_CHANGE * CHANGE_KIND_MULTIPLIER + i);
+      }
+    }
+    for (let i = 0; i < snapshot.sectorNotZeroValues.length; i++) {
+      if (
+        snapshot.sectorNotZeroValues[i] !== boardFeatureData.sectorNotZeroValues[i] ||
+        snapshot.sectorNotOneValues[i] !== boardFeatureData.sectorNotOneValues[i] ||
+        snapshot.sectorNotTwoValues[i] !== boardFeatureData.sectorNotTwoValues[i] ||
+        snapshot.sectorOnlyOneValues[i] !== boardFeatureData.sectorOnlyOneValues[i]
+      ) {
+        this.changeLog.push(SECTOR_CHANGE * CHANGE_KIND_MULTIPLIER + i);
+      }
+    }
+
+  }
+
+  private saveSnapshot(boardFeatureData: BoardFeatureData): void {
+    this.binaryData.snapshots.set(this.boardPatternBoard, {
+      verifiedCounts: this.verifiedCounts.slice(),
+      exceptionLists: this.exceptionLists.map((exceptions) => exceptions.slice()),
+      faceValues: boardFeatureData.faceValues.slice(),
+      redEdgeValues: boardFeatureData.redEdgeValues.slice(),
+      blackEdgeValues: boardFeatureData.blackEdgeValues.slice(),
+      sectorNotZeroValues: boardFeatureData.sectorNotZeroValues.slice(),
+      sectorNotOneValues: boardFeatureData.sectorNotOneValues.slice(),
+      sectorNotTwoValues: boardFeatureData.sectorNotTwoValues.slice(),
+      sectorOnlyOneValues: boardFeatureData.sectorOnlyOneValues.slice(),
+    });
+  }
+
   private addException(ruleIndex: number, embeddingIndex: number): void {
     const exceptions = this.exceptionLists[ruleIndex];
     if (!exceptions.includes(embeddingIndex)) {
@@ -441,6 +592,21 @@ export class BinaryPatternSolver implements TSolver<Data, TAnnotatedAction<Data>
         );
       },
       ruleHasFaceColorFeatures: (ruleIndex) => group.collection.ruleHasFaceColorFeatures(ruleIndex),
+      snapshots: getSnapshots(group, size),
     });
   }
 }
+
+const getSnapshots = (group: BinaryMixedRuleGroup, size: number): Map<BoardPatternBoard, ScanSnapshot> => {
+  let sizeMap = groupSnapshotsMap.get(group);
+  if (!sizeMap) {
+    sizeMap = new Map();
+    groupSnapshotsMap.set(group, sizeMap);
+  }
+  let snapshots = sizeMap.get(size);
+  if (!snapshots) {
+    snapshots = new Map();
+    sizeMap.set(size, snapshots);
+  }
+  return snapshots;
+};
