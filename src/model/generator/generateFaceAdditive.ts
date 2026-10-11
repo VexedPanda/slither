@@ -6,7 +6,7 @@ import { CompleteData } from '../data/combined/CompleteData.ts';
 import { TCompleteData } from '../data/combined/TCompleteData.ts';
 import { TState } from '../data/core/TState.ts';
 import FaceValue from '../data/face-value/FaceValue.ts';
-import { satSolve } from '../solver/SATSolver.ts';
+import { incrementalSatSolve } from '../solver/IncrementalSATSolver.ts';
 import { MaximumSolverIterationsError } from '../solver/errors/MaximumSolverIterationsError.ts';
 import { MultipleSolutionsError } from '../solver/errors/MultipleSolutionsError.ts';
 import { TSolvedPuzzle } from './TSolvedPuzzle.ts';
@@ -43,7 +43,7 @@ export const generateFaceAdditive = async (
     const getSolutionCount = (state: TState<TCompleteData>) => {
       try {
         // TODO: try to invoke our normal solver first? (could increase or decrease performance)
-        solutions = satSolve(board, state, {
+        solutions = incrementalSatSolve(board, state, {
           maxIterations: 10000,
           failOnMultipleSolutions: true,
         });
