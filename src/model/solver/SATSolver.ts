@@ -98,6 +98,15 @@ export const satSolve = (
   state: TState<TEdgeStateData & TFaceValueData>,
   options: SatSolveOptions,
 ): TEdge[][] => {
+  // Logic-solver's argument checks are a large part of clause generation time, and our inputs are generated
+  return Logic.disablingAssertions(() => satSolveWithoutAssertions(board, state, options));
+};
+
+const satSolveWithoutAssertions = (
+  board: TBoard,
+  state: TState<TEdgeStateData & TFaceValueData>,
+  options: SatSolveOptions,
+): TEdge[][] => {
   // also, we might as well apply a "normal" solver first, to reduce the number of variables/clauses needed?
   // for instance, this should immediately outlaw 0s
 
@@ -117,54 +126,61 @@ export const satSolve = (
 
   const solver = new Logic.Solver();
 
-  const name = (edge: TEdge) => {
-    const result = edgeToVariable.get(edge);
+  // Every constraint below is a plain clause, so we add numeric clauses directly. Going through Logic.or() etc. was
+  // most of the solve time (formula objects, flattening, and parsing variable names for every term).
+  const edgeToVariableNumber = new Map(whiteEdges.map((edge) => [edge, solver.getVarNum(edgeToVariable.get(edge))]));
+
+  const term = (edge: TEdge): number => {
+    const result = edgeToVariableNumber.get(edge);
     assertEnabled() && assert(result !== undefined, 'Edge not found!');
-    return result;
+    return result!;
   };
-  const notName = (edge: TEdge) => `-${name(edge)}`;
+  const notTerm = (edge: TEdge): number => -term(edge);
+
+  const addClause = (terms: number[]) => {
+    solver._addClause(new Logic.Clause(terms));
+  };
 
   const none = (edges: TEdge[]) => {
     for (const edge of edges) {
-      solver.require(Logic.not(name(edge)));
+      addClause([notTerm(edge)]);
     }
   };
 
   const some = (edges: TEdge[]) => {
-    solver.require(Logic.or(...edges.map(name)));
+    addClause(edges.map(term));
   };
 
   const notAll = (edges: TEdge[]) => {
-    // TODO: hotspot (6% of solving time)
-    solver.require(Logic.or(...edges.map(notName)));
+    addClause(edges.map(notTerm));
   };
 
   const atLeastN = (edges: TEdge[], n: number) => {
-    // TODO: hotspot (7% of solving time)
     if (n > 0) {
       some(edges);
       Combination.forEachCombination(edges, (combination: readonly TEdge[]) => {
         if (combination.length === edges.length - n + 1) {
-          // TODO: is this... horrible?
-          solver.require(Logic.not(Logic.and(...combination.map(notName))));
+          // NOT( AND( NOT ... ) ), as a plain clause
+          addClause(combination.map(term));
         }
       });
     }
   };
 
   const atMostN = (edges: TEdge[], n: number) => {
-    // TODO: hotspot (15% of solving time)
     Combination.forEachCombination(edges, (combination: readonly TEdge[]) => {
       if (combination.length === n + 1) {
-        solver.require(Logic.or(...combination.map(notName)));
+        addClause(combination.map(notTerm));
       }
     });
   };
 
   const not1 = (edges: TEdge[]) => {
-    // TODO: hotspot (27% of solving time)
-    // TODO: see if it's better if we manually add the implications (e.g. for every permutation of 2, ( A or NOT B ))
-    solver.require(Logic.not(Logic.exactlyOne(...edges.map(name))));
+    // NOT( exactlyOne ) as plain clauses (each edge implies another edge), which avoids the auxiliary variables and
+    // formula expansion of Logic.exactlyOne
+    for (const edge of edges) {
+      addClause([notTerm(edge), ...edges.filter((otherEdge) => otherEdge !== edge).map(term)]);
+    }
   };
 
   const zeroOrTwo = (edges: TEdge[]) => {
