@@ -1,6 +1,6 @@
 import fs from 'fs';
 import puppeteer from 'puppeteer';
-import svgo from 'svgo';
+import * as svgo from 'svgo';
 
 // `node bin/export-images.js --max_old_space_size=8192 --stack-size=1024` to run this script with more memory
 // TODO: it seems svgo can crash fairly easily, perhaps we should be more careful about how we're using it?
@@ -110,17 +110,9 @@ const executablePath = [
         try {
           optimizedSVG = svgo.optimize(svg, {
             multipass: true,
-            plugins: [
-              {
-                name: 'preset-default',
-                params: {
-                  overrides: {
-                    // We can't scale things and get the right bounds if the view box is removed.
-                    removeViewBox: false,
-                  },
-                },
-              },
-            ],
+            // We can't scale things and get the right bounds if the view box is removed. As of svgo 4, removeViewBox is no
+            // longer part of preset-default, so the view box is kept.
+            plugins: ['preset-default'],
           }).data;
         } catch (e) {
           console.log('PROBABLY A SVGO CRASH', e);
