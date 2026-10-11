@@ -12,7 +12,7 @@
   "dependencies": {
     "@techstark/opencv-js": "4.9.0-release.2",
     "culori": "~4.0.1",
-    "pako": "~2.1.0",
+    "pako": "~3.0.2",
     "phet-lib": "0.0.12",
     "tesseract.js": "~5.0.4"
   },
@@ -21,7 +21,6 @@
     "@types/culori": "~2.1.0",
     "@types/jquery": "~3.5.13",
     "@types/lodash": "~4.14.172",
-    "@types/pako": "~2.0.3",
     "@types/qunit": "~2.19.6",
     "@types/three": "~0.137.0",
     "@typescript-eslint/eslint-plugin": "~7.0.1",
