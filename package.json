@@ -30,7 +30,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "3.3.2",
     "proper-lockfile": "~4.1.2",
-    "puppeteer": "~22.7.1",
+    "puppeteer": "~24.43.1",
     "qunit": "~2.20.1",
     "rollup-plugin-modify": "~3.0.0",
     "rollup-plugin-unassert": "~0.6.0",
