@@ -1,5 +1,4 @@
 // @ts-check
-
 import ts from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 import eslintConfigPrettier from 'eslint-config-prettier';
@@ -34,7 +33,6 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-member-accessibility': 'error',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/member-delimiter-style': 'error',
       '@typescript-eslint/member-ordering': 'off',
       '@typescript-eslint/method-signature-style': 'off',
       // '@typescript-eslint/no-base-to-string': 'error',
@@ -68,40 +66,19 @@ export default [
       '@typescript-eslint/restrict-template-expressions': 'off',
 
       'brace-style': 'off',
-      '@typescript-eslint/brace-style': [
-        'error',
-        'stroustrup',
-        { allowSingleLine: true },
-      ],
 
       'comma-dangle': 'off',
-      '@typescript-eslint/comma-dangle': 'off',
 
       'comma-spacing': 'off',
-      '@typescript-eslint/comma-spacing': 'error',
 
       'default-param-last': 'off',
       '@typescript-eslint/default-param-last': 'error',
 
       'func-call-spacing': 'off',
-      '@typescript-eslint/func-call-spacing': 'error',
 
       indent: 'off',
-      '@typescript-eslint/indent': 'off',
 
       'keyword-spacing': 'off',
-      '@typescript-eslint/keyword-spacing': [
-        'error',
-        {
-          before: true,
-          after: true,
-          overrides: {
-            case: { after: true },
-            switch: { after: true },
-            catch: { after: true },
-          },
-        },
-      ],
 
       'no-dupe-class-members': 'off',
       '@typescript-eslint/no-dupe-class-members': 'error',
@@ -116,46 +93,37 @@ export default [
       '@typescript-eslint/no-redeclare': 'error',
 
       'no-throw-literal': 'off',
-      '@typescript-eslint/no-throw-literal': 'off',
 
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         {
           args: 'none',
+          // typescript-eslint v8 changed the default to 'all'; keep the previous behavior
+          caughtErrors: 'none',
         },
       ],
 
+      // Added to the recommended set in typescript-eslint v8; conflicts with the `assertEnabled() && assert( ... )` pattern
+      'no-unused-expressions': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+
       'object-curly-spacing': 'off',
-      '@typescript-eslint/object-curly-spacing': ['error', 'always'],
 
       'padding-line-between-statements': 'off',
-      '@typescript-eslint/padding-line-between-statements': 'error',
 
       quotes: 'off',
-      '@typescript-eslint/quotes': 'off',
 
       'require-await': 'off',
       '@typescript-eslint/require-await': 'off',
 
       semi: 'off',
-      '@typescript-eslint/semi': ['error', 'always'],
 
       'space-before-blocks': 'off',
-      '@typescript-eslint/space-before-blocks': 'error',
 
       'space-before-function-paren': 'off',
-      '@typescript-eslint/space-before-function-paren': [
-        'error',
-        {
-          anonymous: 'never',
-          named: 'never',
-          asyncArrow: 'always',
-        },
-      ],
 
       'space-infix-ops': 'off',
-      '@typescript-eslint/space-infix-ops': 'error',
 
       // 'ts/return-await': 2
     },
