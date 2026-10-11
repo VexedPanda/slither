@@ -4,7 +4,7 @@ import { TStructure } from '../board/core/TStructure.ts';
 import { TCompleteData } from '../data/combined/TCompleteData.ts';
 import { TState } from '../data/core/TState.ts';
 import FaceValue from '../data/face-value/FaceValue.ts';
-import { satSolve } from '../solver/SATSolver.ts';
+import { incrementalSatSolve } from '../solver/IncrementalSATSolver.ts';
 import { MultipleSolutionsError } from '../solver/errors/MultipleSolutionsError.ts';
 import { KnownSolutions } from './KnownSolutions.ts';
 import { TSolvedPuzzle } from './TSolvedPuzzle.ts';
@@ -40,7 +40,7 @@ export const greedyFaceMinimize = async <Structure extends TStructure, Data exte
 
     try {
       // TODO: try to invoke our normal solver first?
-      satSolve(board, state, {
+      incrementalSatSolve(board, state, {
         maxIterations: 10000,
         failOnMultipleSolutions: true,
       });
