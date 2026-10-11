@@ -220,16 +220,6 @@ export class DeprecatedGeneralSATSolver {
     }
   }
 
-  private getNegatedLiteral(variable: number): number {
-    return (
-      this.isAssigned(variable) ?
-        this.getAssignedValue(variable) ?
-          -variable
-        : variable
-      : variable
-    );
-  }
-
   public findAllSolutions(): GeneralAssignment[][] {
     const allSolutions: GeneralAssignment[][] = [];
     try {
