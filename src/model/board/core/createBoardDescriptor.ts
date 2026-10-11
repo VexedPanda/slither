@@ -193,7 +193,7 @@ class EdgeIdentifierLookup {
 
   public lookupAttempt(a: VertexLocation, b: VertexLocation): EdgeIdentifier | null {
     const map = this.map.get(a);
-    return map ? map.get(b) ?? null : null;
+    return map ? (map.get(b) ?? null) : null;
   }
 
   public lookup(a: VertexLocation, b: VertexLocation): EdgeIdentifier {
@@ -321,8 +321,8 @@ export const createBoardDescriptor = (protoDescriptor: TProtoBoardDescriptor): T
   // Mark face (and guaranteed next/previous) bits on half-edges
   faceDescriptors.forEach((faceDescriptor) => {
     const face = getFace(faceDescriptor.logicalCoordinates)!;
-    const facesVertices = faceDescriptor.vertices.map(
-      (vertexDescriptor) => getVertex(vertexDescriptor.logicalCoordinates)!,
+    const facesVertices = faceDescriptor.vertices.map((vertexDescriptor) =>
+      getVertex(vertexDescriptor.logicalCoordinates)!,
     );
 
     const faceEdges: Edge[] = [];

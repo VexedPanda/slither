@@ -24,7 +24,7 @@ export class BinaryMixedRuleGroup {
   }
 
   public isRuleIndexHighlander(index: number): boolean {
-    return (this.mixedData[Math.floor(index / 8)] & (1 << index % 8)) !== 0;
+    return (this.mixedData[Math.floor(index / 8)] & (1 << (index % 8))) !== 0;
   }
 
   public withOnlyHighlander(): BinaryMixedRuleGroup {
@@ -71,7 +71,7 @@ export class BinaryMixedRuleGroup {
     const addRule = (patternBoard: TPatternBoard, bytesSuffix: number[], isHighlander: boolean) => {
       collection.addRuleSuffixBytes(patternBoard, bytesSuffix, isHighlander);
       if (isHighlander) {
-        mixedData[Math.floor(index / 8)] |= 1 << index % 8;
+        mixedData[Math.floor(index / 8)] |= 1 << (index % 8);
       }
       index++;
     };
@@ -133,7 +133,7 @@ export class BinaryMixedRuleGroup {
     const addRule = (rule: PatternRule, isHighlander: boolean) => {
       collection.addRule(rule);
       if (isHighlander) {
-        mixedData[Math.floor(index / 8)] |= 1 << index % 8;
+        mixedData[Math.floor(index / 8)] |= 1 << (index % 8);
       }
       index++;
     };
