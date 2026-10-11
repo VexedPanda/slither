@@ -3,7 +3,7 @@ import { getEmbeddings } from '../embedding/getEmbeddings.ts';
 import { FeatureSet } from '../feature/FeatureSet.ts';
 import FeatureSetMatchState from '../feature/FeatureSetMatchState.ts';
 import { TBoardFeatureData } from '../feature/TBoardFeatureData.ts';
-import { getBinaryFeatureMapping } from '../generation/BinaryFeatureMapping.ts';
+import { BinaryFeatureMapping, getBinaryFeatureMapping } from '../generation/BinaryFeatureMapping.ts';
 import { TPatternBoard } from '../pattern-board/TPatternBoard.ts';
 import { deserializePatternBoard } from '../pattern-board/deserializePatternBoard.ts';
 import { serializePatternBoard } from '../pattern-board/serializePatternBoard.ts';
@@ -424,6 +424,8 @@ export class BinaryRuleCollection {
     return null;
   }
 
+  private readonly binaryMappingCache: (BinaryFeatureMapping | undefined)[] = [];
+
   public isActionableEmbeddingFromData(
     targetPatternBoard: TPatternBoard,
     boardData: TBoardFeatureData,
@@ -435,7 +437,8 @@ export class BinaryRuleCollection {
     const patternBoard = this.patternBoards[patternBoardIndex];
     // assertEnabled() && assert(patternBoard, 'pattern board');
 
-    const binaryMapping = getBinaryFeatureMapping(patternBoard);
+    // Cached per pattern board index, since this is the hot path for solving
+    const binaryMapping = (this.binaryMappingCache[patternBoardIndex] ??= getBinaryFeatureMapping(patternBoard));
 
     // Input features, filter by the "input" of the pattern
     while (true) {
@@ -460,11 +463,10 @@ export class BinaryRuleCollection {
           if (nextByte & 0x80) {
             const secondaryFaceIndex = nextByte & 0x7f;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const secondaryColorFromFirstPrimary =
-              boardData.oppositeFaceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.oppositeFaceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const secondaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[secondaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[secondaryFaceIndex].index]];
 
             if (secondaryColorFromFirstPrimary !== secondaryColorDirect) {
               return false;
@@ -472,11 +474,10 @@ export class BinaryRuleCollection {
           } else {
             const primaryFaceIndex = nextByte;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const primaryColorFromFirstPrimary =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const primaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[primaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[primaryFaceIndex].index]];
 
             if (primaryColorFromFirstPrimary !== primaryColorDirect) {
               return false;
@@ -516,11 +517,10 @@ export class BinaryRuleCollection {
           if (nextByte & 0x80) {
             const secondaryFaceIndex = nextByte & 0x7f;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const secondaryColorFromFirstPrimary =
-              boardData.oppositeFaceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.oppositeFaceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const secondaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[secondaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[secondaryFaceIndex].index]];
 
             if (secondaryColorFromFirstPrimary !== secondaryColorDirect) {
               return true;
@@ -528,11 +528,10 @@ export class BinaryRuleCollection {
           } else {
             const primaryFaceIndex = nextByte;
 
-            // TODO: have embeddings with a DIRECT index map, instead of this. We do not need such complex lookups
             const primaryColorFromFirstPrimary =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[mainPrimaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[mainPrimaryFaceIndex].index]];
             const primaryColorDirect =
-              boardData.faceColors[embedding.mapFace(patternBoard.faces[primaryFaceIndex]).index];
+              boardData.faceColors[embedding.mappedFaceIndices[patternBoard.faces[primaryFaceIndex].index]];
 
             if (primaryColorFromFirstPrimary !== primaryColorDirect) {
               return true;
