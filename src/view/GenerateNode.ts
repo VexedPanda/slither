@@ -7,7 +7,15 @@ import { UITextPushButton } from './UITextPushButton.ts';
 import { ViewContext } from './ViewContext.ts';
 import { getVerticalRadioButtonGroup } from './getVerticalRadioButtonGroup.ts';
 
-import { BooleanProperty, Multilink, NumberProperty, Property, TinyEmitter, TinyProperty } from 'phet-lib/axon';
+import {
+  BooleanProperty,
+  DerivedProperty,
+  Multilink,
+  NumberProperty,
+  Property,
+  TinyEmitter,
+  TinyProperty,
+} from 'phet-lib/axon';
 import { Dimension2 } from 'phet-lib/dot';
 import { Shape } from 'phet-lib/kite';
 import { optionize } from 'phet-lib/phet-core';
@@ -22,13 +30,23 @@ import { polygonGenerators } from '../model/board/generators/polygonGenerators.t
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';
 import FaceValue from '../model/data/face-value/FaceValue.ts';
 import CanSolveDifficulty from '../model/generator/CanSolveDifficulty.ts';
+import { TSolvedPuzzle } from '../model/generator/TSolvedPuzzle.ts';
 import { canSolveDifficultyProperty } from '../model/generator/canSolveDifficultyProperty.ts';
+import { preGenerateNextPuzzleProperty } from '../model/generator/preGenerateNextPuzzleProperty.ts';
 import { BasicPuzzle } from '../model/puzzle/BasicPuzzle.ts';
 import { TPropertyPuzzle } from '../model/puzzle/TPuzzle.ts';
 
 import { LocalStorageProperty } from '../util/localStorage.ts';
 
 import { generateAdditiveConstrainedWithWorker } from '../workers/getGenerationAdditiveConstrainedWorker.ts';
+import {
+  clearPreGeneratedPuzzle,
+  getPreGenerationKey,
+  preGeneratedPuzzleReadyProperty,
+  preGeneratingPuzzleProperty,
+  startPreGeneratingPuzzle,
+  takePreGeneratedPuzzle,
+} from '../workers/nextPuzzlePreGenerator.ts';
 
 type SelfOptions = {
   loadPuzzle: (puzzle: TPropertyPuzzle<TStructure, TCompleteData>) => void;
@@ -126,6 +144,42 @@ export class GenerateNode extends HBox {
             orientation: 'horizontal',
             align: 'center',
             spacing: 30,
+          },
+        ),
+      ],
+    });
+
+    // Settings of the last generated puzzle, so we can pre-generate another like it
+    let lastGenerated: {
+      generator: PolygonGenerator;
+      parameters: Record<string, any>;
+      canSolveDifficulty: CanSolveDifficulty;
+    } | null = null;
+
+    preGenerateNextPuzzleProperty.lazyLink((preGenerate) => {
+      if (!preGenerate) {
+        clearPreGeneratedPuzzle();
+      } else if (lastGenerated) {
+        startPreGeneratingPuzzle(lastGenerated.generator, lastGenerated.parameters, lastGenerated.canSolveDifficulty);
+      }
+    });
+
+    const preGenerateControlsContainer = new HBox({
+      spacing: 20,
+      align: 'center',
+      layoutOptions: {
+        grow: 0,
+      },
+      children: [
+        new UITextCheckbox('Generate next puzzle in background', preGenerateNextPuzzleProperty),
+        new UIText(
+          new DerivedProperty([preGeneratedPuzzleReadyProperty, preGeneratingPuzzleProperty], (ready, generating) =>
+            ready ? 'Next puzzle ready'
+            : generating ? 'Generating next puzzle...'
+            : '',
+          ),
+          {
+            visibleProperty: preGenerateNextPuzzleProperty,
           },
         ),
       ],
@@ -303,6 +357,42 @@ export class GenerateNode extends HBox {
           listener: async () => {
             interruptGenerateEmitter.emit();
 
+            const canSolveDifficulty = canSolveDifficultyProperty.value;
+
+            const loadGeneratedPuzzle = (solvedPuzzle: TSolvedPuzzle<TStructure, TCompleteData>) => {
+              options.loadPuzzle(BasicPuzzle.fromSolvedPuzzle(solvedPuzzle));
+
+              lastGenerated = { generator, parameters: { ...parameters }, canSolveDifficulty };
+              if (preGenerateNextPuzzleProperty.value) {
+                startPreGeneratingPuzzle(generator, parameters, canSolveDifficulty);
+              }
+            };
+
+            // Use a puzzle generated in the background with these settings, if available
+            const preGeneratedPuzzlePromise = takePreGeneratedPuzzle(
+              getPreGenerationKey(generator, parameters, canSolveDifficulty),
+            );
+            if (preGeneratedPuzzlePromise) {
+              let interrupted = false;
+              const preGeneratedInterruptListener = () => {
+                interrupted = true;
+              };
+              interruptGenerateEmitter.addListener(preGeneratedInterruptListener);
+
+              const preGeneratedPuzzle = await preGeneratedPuzzlePromise;
+
+              if (interruptGenerateEmitter.hasListener(preGeneratedInterruptListener)) {
+                interruptGenerateEmitter.removeListener(preGeneratedInterruptListener);
+              }
+              if (interrupted) {
+                return;
+              }
+              if (preGeneratedPuzzle) {
+                loadGeneratedPuzzle(preGeneratedPuzzle);
+                return;
+              }
+            }
+
             const polygons = generator.generate(parameters);
 
             const board = PolygonGeneratorBoard.get(generator, parameters);
@@ -367,7 +457,7 @@ export class GenerateNode extends HBox {
             // const minimizedPuzzle = await generateAdditiveConstrained(
             const minimizedPuzzle = await generateAdditiveConstrainedWithWorker(
               board,
-              canSolveDifficultyProperty.value,
+              canSolveDifficulty,
               interruptedProperty,
               faceDefineEmitter,
               faceMinimizeEmitter,
@@ -376,7 +466,7 @@ export class GenerateNode extends HBox {
 
             if (minimizedPuzzle) {
               previewGeneratedNode.children = [];
-              options.loadPuzzle(BasicPuzzle.fromSolvedPuzzle(minimizedPuzzle));
+              loadGeneratedPuzzle(minimizedPuzzle);
             }
 
             if (interruptGenerateEmitter.hasListener(interruptListener)) {
@@ -434,6 +524,7 @@ export class GenerateNode extends HBox {
               generateButtonContainer,
               new HSeparator(),
               difficultyControlsContainer,
+              preGenerateControlsContainer,
               new HSeparator(),
               propertiesControlsContainer,
             ],

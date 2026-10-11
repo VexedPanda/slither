@@ -1,5 +1,6 @@
 export const changelog = [
   [
+    'Added option to generate the next puzzle in the background while playing',
     'Fix edge dragging when pressing on an already-pressed edge',
     'Adding difficulties for generation',
     'Improved share icon',
