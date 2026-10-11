@@ -11,14 +11,14 @@
   },
   "dependencies": {
     "@techstark/opencv-js": "4.9.0-release.2",
-    "culori": "~4.0.1",
+    "culori": "~4.0.2",
     "pako": "~3.0.2",
     "phet-lib": "0.0.12",
     "tesseract.js": "~7.0.0"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/culori": "~2.1.0",
+    "@types/culori": "~4.0.1",
     "@types/jquery": "~3.5.13",
     "@types/lodash": "~4.17.26",
     "@types/qunit": "~2.19.6",
