@@ -1,4 +1,4 @@
-import { TEmitter } from 'phet-lib/axon';
+import { TEmitter } from 'scenerystack/axon';
 
 export interface TAnyData {
   anyStateChangedEmitter: TEmitter;

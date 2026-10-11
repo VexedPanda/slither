@@ -3,8 +3,8 @@ import { PuzzleBackgroundNode } from './PuzzleBackgroundNode.ts';
 import { SectorNode } from './SectorNode.ts';
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { HBox, Node, Path, Rectangle } from 'phet-lib/scenery';
-import { Panel, RectangularPushButton } from 'phet-lib/sun';
+import { HBox, Node, Path, Rectangle } from 'scenerystack/scenery';
+import { Panel, RectangularPushButton } from 'scenerystack/sun';
 
 import SectorState from '../../model/data/sector-state/SectorState.ts';
 import { TSector } from '../../model/data/sector-state/TSector.ts';

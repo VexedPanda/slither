@@ -19,7 +19,7 @@ import { VertexState } from '../vertex-state/VertexState.ts';
 import { CompleteAction } from './CompleteAction.ts';
 import { TCompleteData, TSerializedCompleteData, serializeCompleteData } from './TCompleteData.ts';
 
-import { TEmitter, TinyEmitter } from 'phet-lib/axon';
+import { TEmitter, TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

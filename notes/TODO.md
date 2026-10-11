@@ -2,7 +2,7 @@
 - PhET bugginess:
   - How to get text entry (DOM node?) - can we focus it on detecting a click? NO we NEED to pass events through
   - Get CAG fixed, using Alpenglow's robust option
-    - Get alpenglow into a usable state in phet-lib
+    - Get alpenglow into a usable state in scenerystack
 
 - Current code TODOs
   - 
@@ -163,7 +163,7 @@
       - simplest example first
     - 
     - Fix (quickly) the Face Value display (static/remaining/ratio), so it can be more visible up top
-      - Get ComboBox working with phet-lib working nicely.
+      - Get ComboBox working with scenerystack working nicely.
     - Index page slow to load
     - Get short shareable puzzle URLs (short code for tiling + params for board, fall-back to board serialization, and list face values in order)
       - For state... solve this incrementally:
@@ -191,9 +191,8 @@
     - Bolder colors in face-color-only mode?
     - Undo/redo larger (and at the bottom, with edit modes?)
     - "Automatic" auto-solve icon
-    - phet-lib:
+    - scenerystack:
       - Use hotkey system that is new (bleh, this does NOT work well with ctrl-z and ctrl-shift-z - latter bugs it up)
-      - GET IT WORKING WITH d.ts FILES!!!
   - 
   - Misc Solvers [see solvers.md]
   - "Solver config" for auto-solve, generation, hint choice, etc.

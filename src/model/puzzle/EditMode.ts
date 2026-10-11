@@ -1,5 +1,5 @@
-import { BooleanProperty, DerivedProperty, TReadOnlyProperty } from 'phet-lib/axon';
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { BooleanProperty, DerivedProperty, TReadOnlyProperty } from 'scenerystack/axon';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 import { LocalStorageBooleanProperty, LocalStorageEnumerationProperty } from '../../util/localStorage.ts';
 

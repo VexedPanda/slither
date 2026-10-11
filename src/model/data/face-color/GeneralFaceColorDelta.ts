@@ -5,7 +5,7 @@ import { TState } from '../core/TState.ts';
 import { GeneralFaceColorAction } from './GeneralFaceColorAction.ts';
 import { TFaceColor, TFaceColorData, TSerializedFaceColorData, serializeFaceColorData } from './TFaceColorData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 import _ from '../../../workarounds/_.ts';

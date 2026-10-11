@@ -6,7 +6,7 @@ import { TState } from '../data/core/TState.ts';
 import { TFaceValueData } from '../data/face-value/TFaceValueData.ts';
 import { TSolvedPuzzle } from '../generator/TSolvedPuzzle.ts';
 
-import { TProperty } from 'phet-lib/axon';
+import { TProperty } from 'scenerystack/axon';
 
 export type TPuzzle<Structure extends TStructure = TStructure, Data extends TFaceValueData = TFaceValueData> = {
   board: TBoard<Structure>;

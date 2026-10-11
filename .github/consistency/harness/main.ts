@@ -1,14 +1,14 @@
 // Generates puzzles with seeded randomness and records a hash of each, plus whether each difficulty's solver can
-// solve it. run.mjs copies this into a checkout (as consistency-check/) and serves it with that checkout's Vite config,
-// so the same harness runs against the base and the changed code. Only uses long-standing APIs, so it also works on
-// older commits.
-import { TinyEmitter, TinyProperty } from 'phet-lib/axon';
-import { dotRandom } from 'phet-lib/dot';
-
+// solve it. run.mjs copies a checkout's own copy of this into it (as consistency-check/) and serves it with that
+// checkout's Vite config, so the base and the changed code each run the harness matching their libraries. Keep the
+// generation and hashing the same across versions, or the comparison will report differences.
 import { PolygonGeneratorBoard } from '../src/model/board/core/PolygonGeneratorBoard.ts';
 import CanSolveDifficulty from '../src/model/generator/CanSolveDifficulty.ts';
 import { generateAdditiveConstrained } from '../src/model/generator/generateAdditiveConstrained.ts';
 import { serializeSolvedPuzzle } from '../src/model/generator/serializeSolvedPuzzle.ts';
+
+import { TinyEmitter, TinyProperty } from 'scenerystack/axon';
+import { dotRandom } from 'scenerystack/dot';
 
 type Cases = {
   boards: string[];

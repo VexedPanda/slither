@@ -7,9 +7,9 @@ import { PatternNode } from './PatternNode.ts';
 import { PatternRuleNode } from './PatternRuleNode.ts';
 import { getBestDisplayEmbeddingForRule } from './getBestDisplayEmbeddingForRule.ts';
 
-import { arrayRemove, optionize } from 'phet-lib/phet-core';
-import { AlignBox, HBox, Node, NodeOptions, Text, VBox } from 'phet-lib/scenery';
-import { Panel } from 'phet-lib/sun';
+import { arrayRemove, optionize } from 'scenerystack/phet-core';
+import { AlignBox, HBox, Node, NodeOptions, Text, VBox } from 'scenerystack/scenery';
+import { Panel } from 'scenerystack/sun';
 
 import { DisplayEmbedding } from '../../model/pattern/embedding/DisplayEmbedding.ts';
 import { BlackEdgeFeature } from '../../model/pattern/feature/BlackEdgeFeature.ts';
@@ -27,7 +27,6 @@ import { RichSolution } from '../../model/pattern/solve/RichSolution.ts';
 
 import _ from '../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
-
 
 type SelfOptions = {
   layoutWidth?: number;

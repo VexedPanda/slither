@@ -4,7 +4,7 @@ import { BaseHalfEdge } from './BaseHalfEdge.ts';
 import { BaseVertex } from './BaseVertex.ts';
 import { TStructure } from './TStructure.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

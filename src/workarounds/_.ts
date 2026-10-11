@@ -1,4 +1,3 @@
-// workaround to make sure we are hitting phet-lib
-import 'phet-lib/dot';
+import _ from 'lodash';
 
-export default window._;
+export default _;

@@ -1,13 +1,13 @@
-import { Display, Node } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { QueryStringMachine } from 'scenerystack/query-string-machine';
+import { Display, Node } from 'scenerystack/scenery';
 
 import { PatternRule } from '../model/pattern/pattern-rule/PatternRule.ts';
 
 import { PatternRuleAnalysisNode } from '../view/pattern/PatternRuleAnalysisNode.ts';
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
-// @ts-expect-error
 const queryParameters = QueryStringMachine.getAll({
   r: {
     type: 'string',
@@ -34,7 +34,7 @@ display.setWidthHeight(window.innerWidth, window.innerHeight);
 console.log('test');
 
 (async () => {
-  const rule: PatternRule = PatternRule.fromBinaryIdentifier(queryParameters.r);
+  const rule: PatternRule = PatternRule.fromBinaryIdentifier(queryParameters.r!);
   console.log(rule.getInputDifficultyScoreB());
   console.log(rule.serialize());
 

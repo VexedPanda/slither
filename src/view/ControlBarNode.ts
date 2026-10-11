@@ -17,16 +17,16 @@ import { TooltipListener } from './TooltipListener.ts';
 import { ViewContext } from './ViewContext.ts';
 import { showPuzzleTimerProperty } from './puzzle/puzzleStyles.ts';
 
-import { DerivedProperty, DynamicProperty, TReadOnlyProperty, TinyProperty } from 'phet-lib/axon';
-import { Shape } from 'phet-lib/kite';
-import { combineOptions } from 'phet-lib/phet-core';
-import { HBox } from 'phet-lib/scenery';
+import { DerivedProperty, DynamicProperty, TReadOnlyProperty, TinyProperty } from 'scenerystack/axon';
+import { Shape } from 'scenerystack/kite';
+import { combineOptions } from 'scenerystack/phet-core';
+import { HBox } from 'scenerystack/scenery';
 import {
   RectangularPushButton,
   RectangularPushButtonOptions,
   TextPushButton,
   TextPushButtonOptions,
-} from 'phet-lib/sun';
+} from 'scenerystack/sun';
 
 import { TStructure } from '../model/board/core/TStructure.ts';
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';

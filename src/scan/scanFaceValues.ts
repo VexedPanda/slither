@@ -1,6 +1,6 @@
-import { Bounds2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { combineOptions, optionize3 } from 'phet-lib/phet-core';
+import { Bounds2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { combineOptions, optionize3 } from 'scenerystack/phet-core';
 
 import tesseract from '../workarounds/tesseract';
 

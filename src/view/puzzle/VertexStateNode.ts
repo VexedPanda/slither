@@ -1,9 +1,9 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { Multilink, TReadOnlyProperty } from 'phet-lib/axon';
-import { ConvexHull2, Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { Circle, Node, Path } from 'phet-lib/scenery';
+import { Multilink, TReadOnlyProperty } from 'scenerystack/axon';
+import { ConvexHull2, Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { Circle, Node, Path } from 'scenerystack/scenery';
 
 import { TEdge } from '../../model/board/core/TEdge.ts';
 import { TVertex } from '../../model/board/core/TVertex.ts';

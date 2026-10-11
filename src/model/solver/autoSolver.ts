@@ -23,7 +23,7 @@ import { VertexToFaceColorSolver } from './VertexToFaceColorSolver.ts';
 import { VertexToSectorSolver } from './VertexToSectorSolver.ts';
 import { safeSolverFactory } from './safeSolverFactory.ts';
 
-import { DerivedProperty } from 'phet-lib/axon';
+import { DerivedProperty } from 'scenerystack/axon';
 
 import { LocalStorageBooleanProperty } from '../../util/localStorage.ts';
 

@@ -6,7 +6,7 @@ import { FaceState } from './FaceState.ts';
 import { GeneralFaceStateAction } from './GeneralFaceStateAction.ts';
 import { TFaceStateData, TSerializedFaceStateData, serializeFaceStateData } from './TFaceStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 export class GeneralFaceStateDelta extends GeneralFaceStateAction implements TDelta<TFaceStateData> {
   public readonly faceStateChangedEmitter = new TinyEmitter<[face: TFace, state: FaceState, oldState: FaceState]>();

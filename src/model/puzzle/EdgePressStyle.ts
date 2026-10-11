@@ -1,6 +1,6 @@
 import EdgeState from '../data/edge-state/EdgeState.ts';
 
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 export default class EdgePressStyle extends EnumerationValue {
   public constructor(

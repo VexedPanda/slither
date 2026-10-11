@@ -13,7 +13,7 @@ import {
   serializeSimpleRegionData,
 } from './TSimpleRegionData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import { MultiIterable } from '../../../workarounds/MultiIterable.ts';
 

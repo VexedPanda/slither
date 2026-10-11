@@ -4,8 +4,8 @@ import { TVertex } from '../board/core/TVertex.ts';
 import EdgeState from '../data/edge-state/EdgeState.ts';
 import LineDragState from './LineDragState.ts';
 
-import { TinyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
+import { TinyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
 
 export class LineDrag {
   public firstEdge!: TEdge;

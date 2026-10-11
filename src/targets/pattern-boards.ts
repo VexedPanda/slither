@@ -1,4 +1,5 @@
-import { AlignBox, AlignGroup, Display, HBox, Node, Text, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, AlignGroup, Display, HBox, Node, Text, VBox } from 'scenerystack/scenery';
 
 import { TPatternBoard } from '../model/pattern/pattern-board/TPatternBoard.ts';
 import { generalPatternBoardGenerations } from '../model/pattern/pattern-board/generalPatternBoardGenerations.ts';
@@ -19,8 +20,7 @@ import { PlanarMappedPatternBoardNode } from '../view/pattern/PlanarMappedPatter
 
 // Load with `http://localhost:5173/pattern-boards.html?debugger`
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

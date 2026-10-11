@@ -1,9 +1,9 @@
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 import { hookPuzzleBackgroundListeners } from './hookPuzzleBackgroundListeners.ts';
 
-import { Graph, LineStyles, Shape } from 'phet-lib/kite';
-import { optionize } from 'phet-lib/phet-core';
-import { Node, Path, PressListenerEvent } from 'phet-lib/scenery';
+import { Graph, LineStyles, Shape } from 'scenerystack/kite';
+import { optionize } from 'scenerystack/phet-core';
+import { Node, Path, PressListenerEvent } from 'scenerystack/scenery';
 
 import { TFace } from '../../model/board/core/TFace.ts';
 import { THalfEdge } from '../../model/board/core/THalfEdge.ts';

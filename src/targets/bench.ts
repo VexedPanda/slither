@@ -1,6 +1,5 @@
 // Generation benchmark: times seeded puzzle generation, and hashes each puzzle so changes can be checked to produce
 // identical puzzles. Usage: bench.html?boards=square-10x10,hexagonal-4&difficulties=EASY,HARD&seeds=1,2,3&sleep=1000
-// @ts-expect-error
 import BenchWorker from '../workers/benchWorker.ts?worker';
 
 const params = new URLSearchParams(location.search);
@@ -44,7 +43,9 @@ const request = (message: unknown): Promise<any> =>
         const result = await request({ type: 'generate', board, difficulty, seed });
         total += result.ms;
         results.push({ board, difficulty, seed, ...result });
-        log(`${board} ${difficulty} seed=${seed}: ${result.ms.toFixed(0)}ms resets=${result.resets} hash=${result.hash}`);
+        log(
+          `${board} ${difficulty} seed=${seed}: ${result.ms.toFixed(0)}ms resets=${result.resets} hash=${result.hash}`,
+        );
       }
       log(`${board} ${difficulty} TOTAL: ${total.toFixed(0)}ms`);
     }

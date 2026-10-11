@@ -1,7 +1,7 @@
-import { TEmitter, TReadOnlyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { DragListener, FireListener, Node, PressListenerEvent, SceneryEvent } from 'phet-lib/scenery';
+import { TEmitter, TReadOnlyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { DragListener, FireListener, Node, PressListenerEvent, SceneryEvent } from 'scenerystack/scenery';
 
 export type ShapeInteractionNodeOptions<T> = {
   delayInteractionEmitter?: TEmitter<[T]>;
@@ -84,21 +84,21 @@ export class ShapeInteractionNode<T> extends Node {
     this.cursor = 'pointer';
 
     // TODO: config setting for shift-click reversal?
+    const isShiftPressed = (event: SceneryEvent) => !!(event.domEvent as MouseEvent | null)?.shiftKey;
+
     const primaryFireListener = new FireListener({
       mouseButton: 0,
-      // @ts-expect-error
-      fire: (event) => onPress(event, event.domEvent?.shiftKey ? 2 : 0),
+      fire: (event) => event && onPress(event, isShiftPressed(event) ? 2 : 0),
     });
 
     const secondaryFireListener = new FireListener({
       mouseButton: 2,
-      // @ts-expect-error
-      fire: (event) => onPress(event, event.domEvent?.shiftKey ? 0 : 2),
+      fire: (event) => event && onPress(event, isShiftPressed(event) ? 0 : 2),
     });
 
     const tertiaryFireListener = new FireListener({
       mouseButton: 1,
-      fire: (event) => onPress(event, 1),
+      fire: (event) => event && onPress(event, 1),
     });
 
     this.disposeEmitter.addListener(() => {

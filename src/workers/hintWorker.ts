@@ -1,3 +1,5 @@
+import { enableAssert } from 'scenerystack/assert';
+
 import { CompleteValidator } from '../model/data/combined/CompleteValidator.ts';
 import { deserializeSolvablePuzzle } from '../model/puzzle/deserializeSolvablePuzzle.ts';
 import { DifficultySolver } from '../model/solver/DifficultySolver.ts';
@@ -7,12 +9,10 @@ import { isAnnotationDisplayed } from '../view/isAnnotationDisplayed.ts';
 
 // TODO: also see web worker cases where this is used
 // TODO: factor out
-// @ts-expect-error
-if (window.assertions && !import.meta.env.PROD) {
+if (!import.meta.env.PROD) {
   // TODO: We should actually... have stripped these, something is going wrong
   console.log('enabling hintWorker assertions');
-  // @ts-expect-error
-  window.assertions.enableAssert();
+  enableAssert();
 }
 
 self.postMessage({

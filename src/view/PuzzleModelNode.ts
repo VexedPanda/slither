@@ -2,9 +2,9 @@ import { AnnotationNode } from './AnnotationNode.ts';
 import { CorrectnessStateNode } from './CorrectnessStateNode.ts';
 import PuzzleNode from './puzzle/PuzzleNode.ts';
 
-import { Multilink } from 'phet-lib/axon';
-import { combineOptions, optionize } from 'phet-lib/phet-core';
-import { Node, NodeOptions } from 'phet-lib/scenery';
+import { Multilink } from 'scenerystack/axon';
+import { combineOptions, optionize } from 'scenerystack/phet-core';
+import { Node, NodeOptions } from 'scenerystack/scenery';
 
 import { TStructure } from '../model/board/core/TStructure.ts';
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';

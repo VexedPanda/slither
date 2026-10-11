@@ -8,7 +8,7 @@ import { GeneralVertexStateDelta } from './GeneralVertexStateDelta.ts';
 import { TSerializedVertexStateData, TVertexStateData, serializeVertexStateData } from './TVertexStateData.ts';
 import { TSerializedVertexState, VertexState } from './VertexState.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

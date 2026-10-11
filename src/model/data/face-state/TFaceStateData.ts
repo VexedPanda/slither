@@ -5,7 +5,7 @@ import { serializeFace } from '../../board/core/serializeFace.ts';
 import { TSerializedState } from '../core/TSerializedState.ts';
 import { FaceState, TSerializedFaceState } from './FaceState.ts';
 
-import { TEmitter } from 'phet-lib/axon';
+import { TEmitter } from 'scenerystack/axon';
 
 export interface TFaceStateData {
   getFaceState(face: TFace): FaceState;

@@ -1,4 +1,5 @@
-import { AlignBox, Display, Node, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, Display, Node, VBox } from 'scenerystack/scenery';
 
 import { Solver } from '../model/logic/minisat/core/Solver.ts';
 import { getStructuralFeatures } from '../model/pattern/feature/getStructuralFeatures.ts';
@@ -11,8 +12,7 @@ import { PatternBoardSolver } from '../model/pattern/solve/PatternBoardSolver.ts
 
 import { PlanarMappedPatternBoardNode } from '../view/pattern/PlanarMappedPatternBoardNode.ts';
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

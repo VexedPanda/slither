@@ -1,4 +1,5 @@
-import { TinyEmitter, TinyProperty } from 'phet-lib/axon';
+import { enableAssert } from 'scenerystack/assert';
+import { TinyEmitter, TinyProperty } from 'scenerystack/axon';
 
 import { deserializeBoard } from '../model/board/core/deserializeBoard.ts';
 import FaceValue from '../model/data/face-value/FaceValue.ts';
@@ -8,12 +9,10 @@ import { serializeSolvedPuzzle } from '../model/generator/serializeSolvedPuzzle.
 
 // TODO: also see web worker cases where this is used
 // TODO: factor out
-// @ts-expect-error
-if (window.assertions && !import.meta.env.PROD) {
+if (!import.meta.env.PROD) {
   // TODO: We should actually... have stripped these, something is going wrong
   console.log('enabling generationAdditiveConstrainedWorker assertions');
-  // @ts-expect-error
-  window.assertions.enableAssert();
+  enableAssert();
 }
 
 self.postMessage({

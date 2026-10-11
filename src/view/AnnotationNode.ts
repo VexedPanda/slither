@@ -1,13 +1,14 @@
+import { GaussianBlur } from './GaussianBlur.ts';
 import { currentTheme } from './Theme.ts';
 import { UIRichText } from './UIRichText.ts';
 import { EmbeddedPatternRuleNode } from './pattern/EmbeddedPatternRuleNode.ts';
 import { TPuzzleStyle } from './puzzle/TPuzzleStyle.ts';
 
-import { Bounds2 } from 'phet-lib/dot';
-import { LineStyles, Shape, Subpath } from 'phet-lib/kite';
-import { Orientation } from 'phet-lib/phet-core';
-import { FireListener, GaussianBlur, Node, Path, TPaint } from 'phet-lib/scenery';
-import { Panel } from 'phet-lib/sun';
+import { Bounds2 } from 'scenerystack/dot';
+import { LineStyles, Shape, Subpath } from 'scenerystack/kite';
+import { Orientation } from 'scenerystack/phet-core';
+import { FireListener, Node, Path, TPaint } from 'scenerystack/scenery';
+import { Panel } from 'scenerystack/sun';
 
 import { TBoard } from '../model/board/core/TBoard.ts';
 import { TEdge } from '../model/board/core/TEdge.ts';

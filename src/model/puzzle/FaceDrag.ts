@@ -3,8 +3,8 @@ import { TFace } from '../board/core/TFace.ts';
 import FaceColorState from '../data/face-color/TFaceColorData.ts';
 import FaceDragState from './FaceDragState.ts';
 
-import { TinyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
+import { TinyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
 

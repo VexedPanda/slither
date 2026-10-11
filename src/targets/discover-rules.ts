@@ -1,4 +1,5 @@
-import { AlignBox, Display, HBox, Node, VBox } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { AlignBox, Display, HBox, Node, VBox } from 'scenerystack/scenery';
 
 import { PolygonGenerator } from '../model/board/PolygonGenerator.ts';
 import {
@@ -53,8 +54,7 @@ import assert, { assertEnabled } from '../workarounds/assert.ts';
 
 // Load with `http://localhost:5173/discover-rules.html?debugger`
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

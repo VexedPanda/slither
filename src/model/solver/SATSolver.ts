@@ -25,8 +25,8 @@ import { finalStateSolve } from './finalStateSolve.ts';
 // @ts-expect-error
 import Logic from './logic-solver/logic-solver.js';
 
-import { Property } from 'phet-lib/axon';
-import { Combination } from 'phet-lib/dot';
+import { Property } from 'scenerystack/axon';
+import { Combination } from 'scenerystack/dot';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
 

@@ -1,4 +1,4 @@
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 export interface PeriodicBoardTiling {
   name: string;

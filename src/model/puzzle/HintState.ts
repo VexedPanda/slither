@@ -1,4 +1,4 @@
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 export default class HintState extends EnumerationValue {
   public static readonly DEFAULT = new HintState();

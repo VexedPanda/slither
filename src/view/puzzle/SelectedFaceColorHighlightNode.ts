@@ -1,8 +1,8 @@
 import { PuzzleBackgroundNode } from './PuzzleBackgroundNode.ts';
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { Shape } from 'phet-lib/kite';
-import { Node, Path } from 'phet-lib/scenery';
+import { Shape } from 'scenerystack/kite';
+import { Node, Path } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import FaceColorState from '../../model/data/face-color/TFaceColorData.ts';

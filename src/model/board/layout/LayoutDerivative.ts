@@ -2,7 +2,15 @@ import { getCentroid, getSignedArea, getSignedAreaDerivative } from '../core/cre
 import { LayoutPuzzle } from './LayoutPuzzle.ts';
 import { LayoutVertex } from './layout.ts';
 
-import { DotUtils, Matrix, Matrix3, SingularValueDecomposition, Vector2 } from 'phet-lib/dot';
+import {
+  Matrix,
+  Matrix3,
+  SingularValueDecomposition,
+  Vector2,
+  distToSegment,
+  lineSegmentIntersection,
+  linear,
+} from 'scenerystack/dot';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
@@ -191,17 +199,17 @@ export class LayoutDerivative {
           const c = points[cIndex];
           const d = points[dIndex];
 
-          if (DotUtils.lineSegmentIntersection(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y)) {
+          if (lineSegmentIntersection(a.x, a.y, b.x, b.y, c.x, c.y, d.x, d.y)) {
             assertEnabled() && assert(points.length >= 4);
 
             // console.log( 'INTERSECTION' );
             additionalStrenthRatio = 1;
           } else {
             const distance = Math.min(
-              DotUtils.distToSegment(a, c, d),
-              DotUtils.distToSegment(b, c, d),
-              DotUtils.distToSegment(c, a, b),
-              DotUtils.distToSegment(d, a, b),
+              distToSegment(a, c, d),
+              distToSegment(b, c, d),
+              distToSegment(c, a, b),
+              distToSegment(d, a, b),
             );
 
             if (distance < minDistanceFromOther) {
@@ -317,7 +325,7 @@ export class LayoutDerivative {
         }
       };
 
-      const ratio = orderedCorrectly ? DotUtils.linear(minimizedDotProduct, 1, 0, 1, currentMaxDotProduct) : 1;
+      const ratio = orderedCorrectly ? linear(minimizedDotProduct, 1, 0, 1, currentMaxDotProduct) : 1;
 
       const minThreshold = 0.75;
 

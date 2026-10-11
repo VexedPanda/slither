@@ -18,7 +18,7 @@ const config = {
   importOrder: [
     '\.css',
     '<THIRD_PARTY_MODULES>',
-    'phet-lib',
+    'scenerystack',
     '^[./]*SlitherQueryParameters\.ts$',
     '^[./]*model',
     '^[./]*scan',

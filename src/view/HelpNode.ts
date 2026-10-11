@@ -6,14 +6,10 @@ import { ViewContext } from './ViewContext.ts';
 import ViewStyleBarNode from './ViewStyleBarNode.ts';
 import { showSectorViewModesProperty } from './puzzle/puzzleStyles.ts';
 
-import { HBox, Node, Rectangle, VBox } from 'phet-lib/scenery';
+import { HBox, Node, Rectangle, VBox } from 'scenerystack/scenery';
 
 export class HelpNode extends PopupNode {
   public constructor(viewContext: ViewContext) {
-    // TODO: fix RichText, omg
-    // @ts-expect-error
-    window.phet.chipper.isFuzzEnabled = () => false;
-
     const editModeIcons = EditModeBarNode.getIcons();
     const viewModeIcons = ViewStyleBarNode.getIcons();
 

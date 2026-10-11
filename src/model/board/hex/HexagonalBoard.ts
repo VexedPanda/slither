@@ -9,7 +9,7 @@ import {
 } from '../core/createBoardDescriptor.ts';
 import { validateBoard } from '../core/validateBoard.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

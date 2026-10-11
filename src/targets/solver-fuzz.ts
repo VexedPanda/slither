@@ -1,5 +1,6 @@
-import { BooleanProperty } from 'phet-lib/axon';
-import { Display, Node } from 'phet-lib/scenery';
+import { enableAssert } from 'scenerystack/assert';
+import { BooleanProperty } from 'scenerystack/axon';
+import { Display, Node } from 'scenerystack/scenery';
 
 import { PolygonGenerator } from '../model/board/PolygonGenerator.ts';
 import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard.ts';
@@ -26,8 +27,7 @@ import assert, { assertEnabled } from '../workarounds/assert.ts';
 
 // Load with `http://localhost:5173/solver-fuzz.html?debugger`
 
-// @ts-expect-error
-window.assertions.enableAssert();
+enableAssert();
 
 const scene = new Node();
 

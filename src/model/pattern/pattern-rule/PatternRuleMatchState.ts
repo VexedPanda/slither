@@ -1,4 +1,4 @@
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 // NOTE: Assumes that face values will NOT be added to the target feature set
 export default class PatternRuleMatchState extends EnumerationValue {

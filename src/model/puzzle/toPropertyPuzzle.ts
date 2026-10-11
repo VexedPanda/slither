@@ -3,7 +3,7 @@ import { TStructure } from '../board/core/TStructure.ts';
 import { TFaceValueData } from '../data/face-value/TFaceValueData.ts';
 import { TPropertyPuzzle, TPuzzle } from './TPuzzle.ts';
 
-import { Property } from 'phet-lib/axon';
+import { Property } from 'scenerystack/axon';
 
 export const toPropertyPuzzle = <
   Structure extends TStructure = TStructure,

@@ -8,7 +8,7 @@ import { FaceState, TSerializedFaceState } from './FaceState.ts';
 import { GeneralFaceStateDelta } from './GeneralFaceStateDelta.ts';
 import { TFaceStateData, TSerializedFaceStateData, serializeFaceStateData } from './TFaceStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

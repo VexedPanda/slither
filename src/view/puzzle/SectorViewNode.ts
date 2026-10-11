@@ -1,9 +1,9 @@
 import { SectorNode } from './SectorNode.ts';
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { Multilink, TReadOnlyProperty } from 'phet-lib/axon';
-import { Shape } from 'phet-lib/kite';
-import { Node, Path } from 'phet-lib/scenery';
+import { Multilink, TReadOnlyProperty } from 'scenerystack/axon';
+import { Shape } from 'scenerystack/kite';
+import { Node, Path } from 'scenerystack/scenery';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TState } from '../../model/data/core/TState.ts';
@@ -11,7 +11,6 @@ import EdgeState from '../../model/data/edge-state/EdgeState.ts';
 import { TEdgeStateData } from '../../model/data/edge-state/TEdgeStateData.ts';
 import SectorState from '../../model/data/sector-state/SectorState.ts';
 import { TSectorStateData } from '../../model/data/sector-state/TSectorStateData.ts';
-
 
 const lineDash = [0.02, 0.02];
 const baseArcRadius = 0.2;

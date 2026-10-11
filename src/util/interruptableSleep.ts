@@ -1,7 +1,7 @@
 import { sleep } from './sleep.ts';
 import { yieldToEventLoop } from './yieldToEventLoop.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
+import { TReadOnlyProperty } from 'scenerystack/axon';
 
 import { InterruptedError } from '../model/solver/errors/InterruptedError.ts';
 

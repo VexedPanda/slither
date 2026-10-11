@@ -20,7 +20,7 @@ import { SimpleVertexSolver } from '../solver/SimpleVertexSolver.ts';
 import { iterateSolverFactory } from '../solver/TSolver.ts';
 import { standardSolverFactory } from '../solver/standardSolverFactory.ts';
 
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 export default class CanSolveDifficulty extends EnumerationValue {
   public constructor(public readonly canSolve: (board: TBoard, state: TState<TCompleteData>) => boolean) {

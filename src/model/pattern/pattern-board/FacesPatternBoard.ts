@@ -14,7 +14,7 @@ import { arePatternBoardsIsomorphic } from './arePatternBoardsIsomorphic.ts';
 import { TPlanarMappedPatternBoard } from './planar-map/TPlanarMappedPatternBoard.ts';
 import { TPlanarPatternMap } from './planar-map/TPlanarPatternMap.ts';
 
-import { Vector2 } from 'phet-lib/dot';
+import { Vector2 } from 'scenerystack/dot';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

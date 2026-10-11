@@ -10,7 +10,7 @@ import SectorState from './SectorState.ts';
 import { TSector } from './TSector.ts';
 import { TSectorStateData, TSerializedSectorStateData } from './TSectorStateData.ts';
 
-import { TinyEmitter } from 'phet-lib/axon';
+import { TinyEmitter } from 'scenerystack/axon';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 

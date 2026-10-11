@@ -15,12 +15,12 @@ import {
   Property,
   TinyEmitter,
   TinyProperty,
-} from 'phet-lib/axon';
-import { Dimension2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { optionize } from 'phet-lib/phet-core';
-import { HBox, HBoxOptions, HSeparator, Node, Path, Rectangle, Text, VBox } from 'phet-lib/scenery';
-import { NumberControl } from 'phet-lib/scenery-phet';
+} from 'scenerystack/axon';
+import { Dimension2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { optionize } from 'scenerystack/phet-core';
+import { HBox, HBoxOptions, HSeparator, Node, Path, Rectangle, Text, VBox } from 'scenerystack/scenery';
+import { NumberControl } from 'scenerystack/scenery-phet';
 
 import { PolygonGenerator } from '../model/board/PolygonGenerator.ts';
 import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard.ts';
@@ -122,22 +122,22 @@ export class GenerateNode extends HBox {
             {
               value: CanSolveDifficulty.EASY,
               createNode: () => new UIText('Easy'),
-              labelContent: 'Easy',
+              options: { accessibleName: 'Easy' },
             },
             {
               value: CanSolveDifficulty.MEDIUM,
               createNode: () => new UIText('Medium'),
-              labelContent: 'Medium',
+              options: { accessibleName: 'Medium' },
             },
             {
               value: CanSolveDifficulty.HARD,
               createNode: () => new UIText('Hard'),
-              labelContent: 'Hard',
+              options: { accessibleName: 'Hard' },
             },
             {
               value: CanSolveDifficulty.NO_LIMIT,
               createNode: () => new UIText('No Limit'),
-              labelContent: 'No Limit',
+              options: { accessibleName: 'No Limit' },
             },
           ],
           {
@@ -258,15 +258,14 @@ export class GenerateNode extends HBox {
           propertiesControlsContainer.addChild(
             new NumberControl(parameter.label, property, parameter.range, {
               layoutFunction: NumberControl.createLayoutFunction4(),
+              accessibleName: parameter.label,
               titleNodeOptions: {
                 font: uiFont,
                 fill: currentTheme.uiForegroundColorProperty,
               },
               sliderOptions: {
                 trackSize: new Dimension2(100, 5),
-                labelTagName: 'label',
                 keyboardStep: 1,
-                labelContent: parameter.label,
               },
               arrowButtonOptions: {
                 touchAreaXDilation: 5,
@@ -288,15 +287,14 @@ export class GenerateNode extends HBox {
           propertiesControlsContainer.addChild(
             new NumberControl(parameter.label, property, parameter.range, {
               layoutFunction: NumberControl.createLayoutFunction4(),
+              accessibleName: parameter.label,
               titleNodeOptions: {
                 font: uiFont,
                 fill: currentTheme.uiForegroundColorProperty,
               },
               sliderOptions: {
                 trackSize: new Dimension2(100, 5),
-                labelTagName: 'label',
                 keyboardStep: 0.1,
-                labelContent: parameter.label,
               },
               numberDisplayOptions: {
                 decimalPlaces: 2,

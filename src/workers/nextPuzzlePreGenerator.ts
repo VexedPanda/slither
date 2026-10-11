@@ -1,6 +1,6 @@
 import { generateAdditiveConstrainedWithWorker } from './getGenerationAdditiveConstrainedWorker.ts';
 
-import { TinyEmitter, TinyProperty } from 'phet-lib/axon';
+import { TinyEmitter, TinyProperty } from 'scenerystack/axon';
 
 import { PolygonGenerator } from '../model/board/PolygonGenerator.ts';
 import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard.ts';

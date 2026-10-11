@@ -1,7 +1,6 @@
-// @ts-expect-error
 import GenerationAdditiveConstrainedWorker from './generationAdditiveConstrainedWorker.ts?worker';
 
-import { TEmitter, TReadOnlyProperty, TinyProperty } from 'phet-lib/axon';
+import { TEmitter, TReadOnlyProperty, TinyProperty } from 'scenerystack/axon';
 
 import { TBoard } from '../model/board/core/TBoard.ts';
 import { TStructure } from '../model/board/core/TStructure.ts';

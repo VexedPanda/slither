@@ -3,8 +3,8 @@ import { ContourCollection } from './ContourCollection.ts';
 import { cvReady, drawContour, imshow, matToCanvas, matToGrayscale, matWithZeros, withMat } from './opencvUtils.ts';
 import cv from '@techstark/opencv-js';
 
-import { Vector2 } from 'phet-lib/dot';
-import { Orientation } from 'phet-lib/phet-core';
+import { Vector2 } from 'scenerystack/dot';
+import { Orientation } from 'scenerystack/phet-core';
 
 import { TEdge } from '../model/board/core/TEdge.ts';
 import { TStructure } from '../model/board/core/TStructure.ts';
@@ -24,7 +24,6 @@ import { getCoordinateClusteredMap } from '../util/getCoordinateClusteredMap.ts'
 
 import _ from '../workarounds/_';
 import assert, { assertEnabled } from '../workarounds/assert.ts';
-
 
 // Basic mat ops: https://docs.opencv.org/4.x/de/d06/tutorial_js_basic_ops.html
 // Image ops: https://docs.opencv.org/4.x/d2/df0/tutorial_js_table_of_contents_imgproc.html

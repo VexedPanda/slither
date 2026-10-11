@@ -1,4 +1,4 @@
-import { Enumeration, EnumerationValue } from 'phet-lib/phet-core';
+import { Enumeration, EnumerationValue } from 'scenerystack/phet-core';
 
 export default class LineDragState extends EnumerationValue {
   public static readonly NONE = new LineDragState();

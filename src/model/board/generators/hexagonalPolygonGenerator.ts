@@ -1,6 +1,6 @@
 import { PolygonGenerator } from '../PolygonGenerator.ts';
 
-import { Range, Vector2 } from 'phet-lib/dot';
+import { Range, Vector2 } from 'scenerystack/dot';
 
 import _ from '../../../workarounds/_.ts';
 

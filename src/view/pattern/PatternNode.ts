@@ -1,8 +1,8 @@
 import { darkTheme, puzzleFont } from '../Theme.ts';
 
-import { Shape } from 'phet-lib/kite';
-import { optionize } from 'phet-lib/phet-core';
-import { Circle, Node, NodeOptions, Path, Text } from 'phet-lib/scenery';
+import { Shape } from 'scenerystack/kite';
+import { optionize } from 'scenerystack/phet-core';
+import { Circle, Node, NodeOptions, Path, Text } from 'scenerystack/scenery';
 
 import { getCentroid } from '../../model/board/core/createBoardDescriptor.ts';
 import { BlackEdgeFeature } from '../../model/pattern/feature/BlackEdgeFeature.ts';
@@ -18,7 +18,6 @@ import { TPatternBoard } from '../../model/pattern/pattern-board/TPatternBoard.t
 import { TPlanarPatternMap } from '../../model/pattern/pattern-board/planar-map/TPlanarPatternMap.ts';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
-
 
 type SelfOptions = {
   showQuestionMarks?: boolean;

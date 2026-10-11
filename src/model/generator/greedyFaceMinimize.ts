@@ -10,8 +10,8 @@ import { KnownSolutions } from './KnownSolutions.ts';
 import { TSolvedPuzzle } from './TSolvedPuzzle.ts';
 import { getSolvedPuzzle } from './getSolvedPuzzle.ts';
 
-import { TEmitter, TReadOnlyProperty } from 'phet-lib/axon';
-import { dotRandom } from 'phet-lib/dot';
+import { TEmitter, TReadOnlyProperty } from 'scenerystack/axon';
+import { dotRandom } from 'scenerystack/dot';
 
 import { interruptableSleep } from '../../util/interruptableSleep.ts';
 

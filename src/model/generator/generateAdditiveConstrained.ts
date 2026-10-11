@@ -9,7 +9,7 @@ import { generateFaceAdditive } from './generateFaceAdditive.ts';
 import { greedyFaceMinimize } from './greedyFaceMinimize.ts';
 import { withAllFacesFilled } from './withAllFacesFilled.ts';
 
-import { TEmitter, TReadOnlyProperty } from 'phet-lib/axon';
+import { TEmitter, TReadOnlyProperty } from 'scenerystack/axon';
 
 import { interruptableSleep } from '../../util/interruptableSleep.ts';
 

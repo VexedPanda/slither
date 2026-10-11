@@ -2,10 +2,10 @@ import { puzzleFont } from '../Theme.ts';
 import { UIText } from '../UIText.ts';
 import { TPuzzleStyle } from './TPuzzleStyle.ts';
 
-import { TReadOnlyProperty } from 'phet-lib/axon';
-import { Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
-import { Circle, GridBox, Node, Path } from 'phet-lib/scenery';
+import { TReadOnlyProperty } from 'scenerystack/axon';
+import { Vector2 } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
+import { Circle, GridBox, Node, Path } from 'scenerystack/scenery';
 
 import { TEdge } from '../../model/board/core/TEdge.ts';
 import { TFace } from '../../model/board/core/TFace.ts';
@@ -14,7 +14,6 @@ import { TEdgeStateData } from '../../model/data/edge-state/TEdgeStateData.ts';
 import { TFaceStateData } from '../../model/data/face-state/TFaceStateData.ts';
 
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
-
 
 export class FaceStateNode extends Node {
   public constructor(

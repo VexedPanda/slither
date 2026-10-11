@@ -1,9 +1,9 @@
 import { isDragModeProperty } from '../PanDragMode.ts';
 import { ShapeInteractionNode } from './ShapeInteractionNode.ts';
 
-import { TEmitter } from 'phet-lib/axon';
-import { DotUtils, Vector2 } from 'phet-lib/dot';
-import { Shape } from 'phet-lib/kite';
+import { TEmitter } from 'scenerystack/axon';
+import { Vector2, triangleAreaSigned } from 'scenerystack/dot';
+import { Shape } from 'scenerystack/kite';
 
 import { TBoard } from '../../model/board/core/TBoard.ts';
 import { TEdge } from '../../model/board/core/TEdge.ts';
@@ -61,7 +61,7 @@ export class EdgeViewInteractionNode extends ShapeInteractionNode<TEdge> {
               diff = diff.normalized();
             }
 
-            if (DotUtils.triangleAreaSigned(a, b, b.plus(diff)) < 0) {
+            if (triangleAreaSigned(a, b, b.plus(diff)) < 0) {
               diff = diff.negated();
             }
 

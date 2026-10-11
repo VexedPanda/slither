@@ -2,8 +2,6 @@ import modify from 'rollup-plugin-modify';
 import unassert from 'rollup-plugin-unassert';
 import { defineConfig } from 'vite';
 
-// Using js/ts compatibility from https://github.com/vitejs/vite/issues/3040
-
 /*
   - Build failure, trying `npm run build --max-old-space-size`
     - export NODE_OPTIONS=--max-old-space-size=32768
@@ -12,80 +10,75 @@ import { defineConfig } from 'vite';
 
 let chunkId = 0;
 
+// The window => self rewrites below let our own code run in web workers. They're skipped for dependencies, which handle
+// workers themselves (and e.g. paper.js would break, since it declares its own window variable).
+const appOnly = (plugin) => ({
+  ...plugin,
+  transform: (source, id) => (id.includes('/node_modules/') ? null : plugin.transform(source, id)),
+});
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: '',
-  resolve: {
-    alias: [
-      {
-        find: /^(.*)\.js$/,
-        replacement: '$1',
-      },
-    ],
-  },
-
   // Because of https://github.com/vitejs/vite/issues/12434?
   optimizeDeps: {
-    exclude: ['phet-lib', 'tesseract.js', 'culori', 'pako'],
+    // scenerystack's CommonJS dependencies need pre-bundling, since scenerystack itself is excluded
+    exclude: ['scenerystack', 'tesseract.js', 'culori', 'pako'],
+    include: [
+      'scenerystack > base64-js',
+      'scenerystack > big.js',
+      'scenerystack > file-saver',
+      'scenerystack > he',
+      'scenerystack > himalaya',
+      'scenerystack > linebreak-ts',
+      'scenerystack > lodash',
+      'scenerystack > paper',
+      'scenerystack > seedrandom',
+      'scenerystack > text-encoder-lite',
+    ],
     entries: [],
   },
 
   plugins: [
-    // Work around paper.js stuff
-    modify({
-      find: 'self = self || window.self;',
-      replace: '',
-    }),
-    modify({
-      find: 'var window = self.window,',
-      replace: '',
-    }),
-    modify({
-      find: 'document = self.document;',
-      replace: 'var document = self.document;',
-    }),
-
-    // Work around a Display.ts issue where we alias self and THEN try to access window
-    modify({
-      find: /const self = this;\s*\(/gm,
-      replace: 'const _self = this;\n(',
-    }),
-    modify({
-      find: 'self._requestAnimationFrameID = window.requestAnimationFrame( step, self._domElement );',
-      replace: '_self._requestAnimationFrameID = self.requestAnimationFrame( step, _self._domElement );',
-    }),
-    modify({
-      find: 'self.updateDisplay();',
-      replace: '_self.updateDisplay();',
-    }),
-
-    // Redirect window to self
-    modify({
-      find: /([^.a-zA-Z0-9_])window(\.|\?\.|\[)/g,
-      replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
-    }),
+    // Redirect window to self (see appOnly above)
+    appOnly(
+      modify({
+        find: /([^.a-zA-Z0-9_])window(\.|\?\.|\[)/g,
+        replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
+      }),
+    ),
 
     // Standalone window to self
-    modify({
-      find: /(\s+)window(\s+)/g,
-      replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
-    }),
-    modify({
-      find: /\(\s*window\s*\)/g,
-      replace: '(self)',
-    }),
-    modify({
-      find: /\(\s*window\s*,/g,
-      replace: '(self,',
-    }),
-    modify({
-      find: /\(\s*!window\s*\)/g,
-      replace: '(!self)',
-    }),
-    modify({
-      find: /in window;/g,
-      replace: 'in self;',
-    }),
+    appOnly(
+      modify({
+        find: /(\s+)window(\s+)/g,
+        replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
+      }),
+    ),
+    appOnly(
+      modify({
+        find: /\(\s*window\s*\)/g,
+        replace: '(self)',
+      }),
+    ),
+    appOnly(
+      modify({
+        find: /\(\s*window\s*,/g,
+        replace: '(self,',
+      }),
+    ),
+    appOnly(
+      modify({
+        find: /\(\s*!window\s*\)/g,
+        replace: '(!self)',
+      }),
+    ),
+    appOnly(
+      modify({
+        find: /in window;/g,
+        replace: 'in self;',
+      }),
+    ),
   ],
 
   build: {
@@ -120,32 +113,44 @@ export default defineConfig({
         // TODO: why are these extra ones needed? This is a wreck
 
         // Redirect window to self
-        modify({
-          find: /([^.a-zA-Z0-9_])window(\.|\?\.|\[)/g,
-          replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
-        }),
+        appOnly(
+          modify({
+            find: /([^.a-zA-Z0-9_])window(\.|\?\.|\[)/g,
+            replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
+          }),
+        ),
 
         // Standalone window to self
-        modify({
-          find: /(\s+)window(\s+)/g,
-          replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
-        }),
-        modify({
-          find: /\(\s*window\s*\)/g,
-          replace: '(self)',
-        }),
-        modify({
-          find: /\(\s*window\s*,/g,
-          replace: '(self,',
-        }),
-        modify({
-          find: /\(\s*!window\s*\)/g,
-          replace: '(!self)',
-        }),
-        modify({
-          find: /in window;/g,
-          replace: 'in self;',
-        }),
+        appOnly(
+          modify({
+            find: /(\s+)window(\s+)/g,
+            replace: (match, prefix, suffix) => `${prefix}self${suffix}`,
+          }),
+        ),
+        appOnly(
+          modify({
+            find: /\(\s*window\s*\)/g,
+            replace: '(self)',
+          }),
+        ),
+        appOnly(
+          modify({
+            find: /\(\s*window\s*,/g,
+            replace: '(self,',
+          }),
+        ),
+        appOnly(
+          modify({
+            find: /\(\s*!window\s*\)/g,
+            replace: '(!self)',
+          }),
+        ),
+        appOnly(
+          modify({
+            find: /in window;/g,
+            replace: 'in self;',
+          }),
+        ),
       ],
     },
   },

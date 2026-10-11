@@ -1,8 +1,8 @@
 import { advancedSettingsVisibleProperty } from './SettingsNode.ts';
 import { currentTheme, rectangularButtonAppearanceStrategy } from './Theme.ts';
 
-import { optionize } from 'phet-lib/phet-core';
-import { RectangularPushButton, RectangularPushButtonOptions } from 'phet-lib/sun';
+import { optionize } from 'scenerystack/phet-core';
+import { RectangularPushButton, RectangularPushButtonOptions } from 'scenerystack/sun';
 
 type SelfOptions = {
   // If it is advanced, will only be visible when advancedSettingsVisibleProperty is true

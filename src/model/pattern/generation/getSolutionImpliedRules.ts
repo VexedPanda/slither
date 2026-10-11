@@ -6,7 +6,7 @@ import { PatternRule } from '../pattern-rule/PatternRule.ts';
 import { GET_RULES_DEFAULTS, GetRulesOptions, GetRulesSelfOptions } from './GetRulesOptions.ts';
 import { getFeatureImpliedRules } from './getFeatureImpliedRules.ts';
 
-import { optionize3 } from 'phet-lib/phet-core';
+import { optionize3 } from 'scenerystack/phet-core';
 
 import _ from '../../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';

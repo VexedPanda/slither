@@ -2,9 +2,10 @@
 //
 // Usage: node .github/consistency/run.mjs <checkout dir> <output json> [cases json]
 //
-// The harness is copied into the checkout (as consistency-check/, removed afterward) and served with that checkout's
-// own Vite config and dependencies, then run in headless Chrome. Vite and Puppeteer are resolved from wherever this
-// script lives, so a checkout without this script (e.g. the base of a pull request) can still be run.
+// The checkout's harness (or this script's, if the checkout has none) is copied into the checkout (as
+// consistency-check/, removed afterward) and served with that checkout's own Vite config and dependencies, then run in
+// headless Chrome. Vite and Puppeteer are resolved from wherever this script lives, so a checkout without this script
+// (e.g. the base of a pull request) can still be run.
 import { createServer } from 'vite';
 import puppeteer from 'puppeteer';
 
@@ -23,8 +24,13 @@ const checkoutDir = path.resolve(checkoutArg);
 const outputPath = path.resolve(outputArg);
 const cases = JSON.parse(fs.readFileSync(casesArg ? path.resolve(casesArg) : path.join(scriptDir, 'cases.json'), 'utf8'));
 
+// Prefer the checkout's own harness, since it imports from the libraries that checkout has installed (e.g. a base
+// from before a dependency change). Fall back to this script's harness for checkouts that predate it.
+const checkoutHarnessDir = path.join(checkoutDir, '.github', 'consistency', 'harness');
+const harnessSourceDir = fs.existsSync(checkoutHarnessDir) ? checkoutHarnessDir : path.join(scriptDir, 'harness');
+
 const harnessDir = path.join(checkoutDir, 'consistency-check');
-fs.cpSync(path.join(scriptDir, 'harness'), harnessDir, { recursive: true });
+fs.cpSync(harnessSourceDir, harnessDir, { recursive: true });
 
 let server = null;
 let browser = null;

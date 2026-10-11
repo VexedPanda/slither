@@ -1,4 +1,4 @@
-import { arrayRemove } from 'phet-lib/phet-core';
+import { arrayRemove } from 'scenerystack/phet-core';
 
 import _ from '../../workarounds/_.ts';
 import assert, { assertEnabled } from '../../workarounds/assert.ts';
