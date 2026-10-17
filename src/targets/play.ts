@@ -32,6 +32,8 @@ import { glassPane } from '../view/glassPane.ts';
 import { currentPuzzleStyle, showPuzzleStyleProperty } from '../view/puzzle/puzzleStyles.ts';
 import { scene } from '../view/scene.ts';
 
+import { resumePreGeneration } from '../workers/nextPuzzlePreGenerator.ts';
+
 // TODO: also see web worker cases where this is used
 // TODO: factor out
 if (!import.meta.env.PROD) {
@@ -69,6 +71,9 @@ export const layoutBoundsProperty = new Property(new Bounds2(0, 0, window.innerW
 
 // TODO: properly support null (it isn't right now)
 const puzzleModelProperty = new TinyProperty<PuzzleModel | null>(getStartupPuzzleModel());
+
+// Restore (or continue generating) the next puzzle, so one is ready no matter when the page was closed
+resumePreGeneration();
 
 const puzzleContainerNode = new PuzzleContainerNode(puzzleModelProperty, currentPuzzleStyle, {
   layoutOptions: {
