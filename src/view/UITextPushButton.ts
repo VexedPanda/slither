@@ -1,6 +1,7 @@
 import { advancedSettingsVisibleProperty } from './SettingsNode.ts';
 import { currentTheme, rectangularButtonAppearanceStrategy, uiFont } from './Theme.ts';
 
+import { TReadOnlyProperty } from 'scenerystack/axon';
 import { optionize } from 'scenerystack/phet-core';
 import { TextPushButton, TextPushButtonOptions } from 'scenerystack/sun';
 
@@ -12,7 +13,7 @@ type SelfOptions = {
 export type UITextPushButtonOptions = SelfOptions & TextPushButtonOptions;
 
 export class UITextPushButton extends TextPushButton {
-  public constructor(text: string, providedOptions?: UITextPushButtonOptions) {
+  public constructor(text: string | TReadOnlyProperty<string>, providedOptions?: UITextPushButtonOptions) {
     const options = optionize<UITextPushButtonOptions, SelfOptions, TextPushButtonOptions>()(
       {
         advanced: false,
