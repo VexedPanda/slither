@@ -72,8 +72,9 @@ export const layoutBoundsProperty = new Property(new Bounds2(0, 0, window.innerW
 // TODO: properly support null (it isn't right now)
 const puzzleModelProperty = new TinyProperty<PuzzleModel | null>(getStartupPuzzleModel());
 
-// Restore (or continue generating) the next puzzle, so one is ready no matter when the page was closed
-resumePreGeneration();
+// Restore (or continue generating) the next puzzle, so one is ready no matter when the page was closed. Deferred until
+// after the first frame, since starting generation builds the board on the main thread.
+requestAnimationFrame(() => setTimeout(resumePreGeneration, 0));
 
 const puzzleContainerNode = new PuzzleContainerNode(puzzleModelProperty, currentPuzzleStyle, {
   layoutOptions: {

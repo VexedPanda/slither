@@ -7,18 +7,20 @@ import { PolygonGeneratorBoard } from '../model/board/core/PolygonGeneratorBoard
 import { TStructure } from '../model/board/core/TStructure.ts';
 import { polygonGenerators } from '../model/board/generators/polygonGenerators.ts';
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';
+import { deserializeState } from '../model/data/core/deserializeState.ts';
 import FaceValue from '../model/data/face-value/FaceValue.ts';
 import CanSolveDifficulty from '../model/generator/CanSolveDifficulty.ts';
-import { TSerializedSolvedPuzzle, TSolvedPuzzle } from '../model/generator/TSolvedPuzzle.ts';
+import { TSolvedPuzzle } from '../model/generator/TSolvedPuzzle.ts';
 import { canSolveDifficultyProperty } from '../model/generator/canSolveDifficultyProperty.ts';
-import { deserializeSolvedPuzzle } from '../model/generator/deserializeSolvedPuzzle.ts';
-import { serializeSolvedPuzzle } from '../model/generator/serializeSolvedPuzzle.ts';
+import { getSolvedPuzzle } from '../model/generator/getSolvedPuzzle.ts';
+
+import { compressString2, decompressString2 } from '../util/compression.ts';
 
 type PreGeneratedPuzzle = {
   key: string;
   interruptedProperty: TinyProperty<boolean>;
-  promise: Promise<TSolvedPuzzle<TStructure, TCompleteData> | null>;
-  result: TSolvedPuzzle<TStructure, TCompleteData> | null;
+  getPuzzle: () => Promise<TSolvedPuzzle<TStructure, TCompleteData> | null>;
+  ready: boolean;
 };
 
 // Persisted to localStorage, so that generation can resume (or a finished puzzle can be used) after a reload
@@ -26,7 +28,11 @@ type StoredGenerationState = {
   generator: string;
   parameters: Record<string, any>;
   canSolveDifficulty: string;
-  solvedPuzzle: TSerializedSolvedPuzzle | null;
+  // Compressed JSON of the clean state and solution edges (the board is determined by the settings). Only the minimum
+  // is stored, since a full serialized solved puzzle for a large board can approach the localStorage quota.
+  puzzle: string | null;
+  // Generation with these settings failed, so don't retry on load
+  failed?: boolean;
 };
 
 const STORAGE_KEY = 'nextPuzzleGenerationState';
@@ -39,8 +45,8 @@ export const preGeneratedPuzzleReadyProperty = new TinyProperty(false);
 export const preGeneratingPuzzleProperty = new TinyProperty(false);
 
 const updateStatus = () => {
-  preGeneratedPuzzleReadyProperty.value = !!preGenerated?.result;
-  preGeneratingPuzzleProperty.value = !!preGenerated && !preGenerated.result;
+  preGeneratedPuzzleReadyProperty.value = !!preGenerated?.ready;
+  preGeneratingPuzzleProperty.value = !!preGenerated && !preGenerated.ready;
 };
 
 const storeGenerationState = (
@@ -48,14 +54,24 @@ const storeGenerationState = (
   parameters: Record<string, any>,
   canSolveDifficulty: CanSolveDifficulty,
   solvedPuzzle: TSolvedPuzzle<TStructure, TCompleteData> | null,
+  failed = false,
 ): void => {
-  const state: StoredGenerationState = {
-    generator: generator.name,
-    parameters: parameters,
-    canSolveDifficulty: canSolveDifficulty.name,
-    solvedPuzzle: solvedPuzzle ? serializeSolvedPuzzle(solvedPuzzle) : null,
-  };
   try {
+    const state: StoredGenerationState = {
+      generator: generator.name,
+      parameters: parameters,
+      canSolveDifficulty: canSolveDifficulty.name,
+      puzzle:
+        solvedPuzzle ?
+          compressString2(
+            JSON.stringify({
+              cleanState: solvedPuzzle.cleanState.serializeState(solvedPuzzle.board),
+              blackEdges: [...solvedPuzzle.blackEdges].map((edge) => solvedPuzzle.board.edges.indexOf(edge)),
+            }),
+          )
+        : null,
+      failed: failed,
+    };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
     // e.g. quota exceeded, persistence is best-effort
@@ -108,31 +124,33 @@ export const startPreGeneratingPuzzle = (
   const board = PolygonGeneratorBoard.get(generator, parameters);
   const interruptedProperty = new TinyProperty(false);
 
+  const promise = generateAdditiveConstrainedWithWorker(
+    board,
+    canSolveDifficulty,
+    interruptedProperty,
+    // Progress is not displayed for background generation
+    new TinyEmitter<[index: number, state: FaceValue]>(),
+    new TinyEmitter<[index: number, state: FaceValue]>(),
+    new TinyEmitter(),
+  );
   const entry: PreGeneratedPuzzle = {
     key: key,
     interruptedProperty: interruptedProperty,
-    promise: generateAdditiveConstrainedWithWorker(
-      board,
-      canSolveDifficulty,
-      interruptedProperty,
-      // Progress is not displayed for background generation
-      new TinyEmitter<[index: number, state: FaceValue]>(),
-      new TinyEmitter<[index: number, state: FaceValue]>(),
-      new TinyEmitter(),
-    ),
-    result: null,
+    getPuzzle: () => promise,
+    ready: false,
   };
   preGenerated = entry;
   updateStatus();
 
-  entry.promise.then((result) => {
+  promise.then((result) => {
     if (preGenerated === entry) {
       if (result) {
-        entry.result = result;
+        entry.ready = true;
         storeGenerationState(generator, parameters, canSolveDifficulty, result);
       } else {
-        // Failed, don't retry
+        // Failed, don't retry (including after a reload)
         preGenerated = null;
+        storeGenerationState(generator, parameters, canSolveDifficulty, null, true);
       }
       updateStatus();
     }
@@ -156,7 +174,7 @@ export const takePreGeneratedPuzzle = (
   storeGenerationState(generator, { ...parameters }, canSolveDifficulty, null);
 
   if (preGenerated?.key === key) {
-    const promise = preGenerated.promise;
+    const promise = preGenerated.getPuzzle();
     preGenerated = null;
     updateStatus();
     return promise;
@@ -189,13 +207,12 @@ const getGenerateNodeSettings = (): StoredGenerationState => {
     generator: generator.name,
     parameters: parameters,
     canSolveDifficulty: canSolveDifficultyProperty.value.name,
-    solvedPuzzle: null,
+    puzzle: null,
   };
 };
 
 /**
- * Restores the persisted generation state: a finished puzzle is made ready
- * immediately, otherwise generation is restarted with the last-used settings (in-progress worker state is not
+ * Restores the persisted generation state: a finished puzzle is made ready immediately, otherwise generation is restarted with the last-used settings (in-progress worker state is not
  * persisted, so an unfinished generation starts over).
  */
 export const resumePreGeneration = (): void => {
@@ -211,20 +228,34 @@ export const resumePreGeneration = (): void => {
     return;
   }
 
-  if (state.solvedPuzzle) {
-    try {
-      const result = deserializeSolvedPuzzle(state.solvedPuzzle);
-      preGenerated = {
-        key: getPreGenerationKey(generator, state.parameters, canSolveDifficulty),
-        interruptedProperty: new TinyProperty(false),
-        promise: Promise.resolve(result),
-        result: result,
-      };
-      updateStatus();
-      return;
-    } catch (e) {
-      console.warn('Failed to restore pre-generated puzzle, regenerating', e);
-    }
+  if (state.failed) {
+    return;
+  }
+
+  const storedPuzzle = state.puzzle;
+  if (storedPuzzle) {
+    // Deserialized only when taken, to keep startup fast
+    preGenerated = {
+      key: getPreGenerationKey(generator, state.parameters, canSolveDifficulty),
+      interruptedProperty: new TinyProperty(false),
+      getPuzzle: async () => {
+        try {
+          const { cleanState, blackEdges } = JSON.parse(decompressString2(storedPuzzle)!);
+          const board = PolygonGeneratorBoard.get(generator, state.parameters);
+          return getSolvedPuzzle(
+            board,
+            deserializeState(board, cleanState),
+            blackEdges.map((index: number) => board.edges[index]),
+          );
+        } catch (e) {
+          console.warn('Failed to restore pre-generated puzzle', e);
+          return null;
+        }
+      },
+      ready: true,
+    };
+    updateStatus();
+    return;
   }
 
   startPreGeneratingPuzzle(generator, state.parameters, canSolveDifficulty);
