@@ -11,6 +11,7 @@ import { TBoard } from '../board/core/TBoard.ts';
 import { TEdge } from '../board/core/TEdge.ts';
 import { TStructure } from '../board/core/TStructure.ts';
 import { TVertex } from '../board/core/TVertex.ts';
+import { CompleteData } from '../data/combined/CompleteData.ts';
 import { TCompleteData } from '../data/combined/TCompleteData.ts';
 import { TState } from '../data/core/TState.ts';
 import EdgeState from '../data/edge-state/EdgeState.ts';
@@ -21,7 +22,6 @@ import { getSolvedPuzzle } from '../generator/getSolvedPuzzle.ts';
 import { TSolvablePropertyPuzzle } from '../puzzle/TPuzzle.ts';
 import { MaximumSolverIterationsError } from './errors/MaximumSolverIterationsError.ts';
 import { MultipleSolutionsError } from './errors/MultipleSolutionsError.ts';
-import { finalStateSolve } from './finalStateSolve.ts';
 // @ts-expect-error
 import Logic from './logic-solver/logic-solver.js';
 
@@ -47,15 +47,14 @@ export const getSolvablePropertyPuzzle = <
       };
     }
 
-    // We actually don't want to take into account the edge state of the board for this initial solve, so we ditch
-    // the edge state.
-    const cleanedState = currentState.clone();
-    for (const edge of board.edges) {
-      cleanedState.setEdgeState(edge, EdgeState.WHITE);
-    }
-    // TODO: do we need to clear other state? THIS IS UNCLEAN, we are not handling face color, sector, etc.
+    // The solution must only depend on the clues, not on anything the player has marked (e.g. a restored puzzle with
+    // a mistaken line would otherwise get that line baked into its solution, leaving the rest of the solution
+    // unresolved, so correct marks would be highlighted as incorrect).
+    const cleanState = CompleteData.fromFaces(board, (face) =>
+      currentState.getFaceValue(face),
+    ) as unknown as TState<Data>;
 
-    const solutions = satSolve(board, cleanedState, {
+    const solutions = satSolve(board, cleanState, {
       maxIterations: 10000,
       failOnMultipleSolutions: true,
     });
@@ -64,19 +63,13 @@ export const getSolvablePropertyPuzzle = <
       return null;
     }
 
-    const solutionEdges = solutions[0];
-
-    const solvedState = cleanedState.clone();
-    for (const edge of solutionEdges) {
-      solvedState.setEdgeState(edge, EdgeState.BLACK);
-    }
-    finalStateSolve(board, solvedState);
-    assertEnabled() && assert(simpleRegionIsSolved(solvedState));
+    const solution = getSolvedPuzzle(board, cleanState, solutions[0]);
+    assertEnabled() && assert(simpleRegionIsSolved(solution.solvedState));
 
     return {
       board,
       stateProperty: new Property(currentState),
-      solution: getSolvedPuzzle(board, currentState, solutionEdges),
+      solution: solution,
     };
   } catch (e) {
     if (e instanceof MultipleSolutionsError) {

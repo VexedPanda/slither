@@ -23,7 +23,9 @@ export class PolygonGeneratorBoard extends PolygonalBoard {
     const key = generator.name + '/' + JSON.stringify(parameters);
 
     if (!polygonGeneratorBoardMap.has(key)) {
-      polygonGeneratorBoardMap.set(key, new PolygonGeneratorBoard(generator, parameters));
+      // Copied, since callers may mutate their parameters afterwards (e.g. the Generate panel's settings), which would
+      // otherwise change how this board is serialized
+      polygonGeneratorBoardMap.set(key, new PolygonGeneratorBoard(generator, { ...parameters }));
     }
 
     return polygonGeneratorBoardMap.get(key)!;
