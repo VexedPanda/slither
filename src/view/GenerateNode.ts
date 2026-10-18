@@ -39,6 +39,8 @@ import { LocalStorageProperty } from '../util/localStorage.ts';
 
 import { generateAdditiveConstrainedWithWorker } from '../workers/getGenerationAdditiveConstrainedWorker.ts';
 import {
+  getPreGenerationKey,
+  preGeneratedKeyProperty,
   preGeneratedPuzzleReadyProperty,
   preGeneratingPuzzleProperty,
   startPreGeneratingPuzzle,
@@ -146,22 +148,40 @@ export class GenerateNode extends HBox {
       ],
     });
 
-    const preGenerateControlsContainer = new HBox({
-      spacing: 20,
-      align: 'center',
-      layoutOptions: {
-        grow: 0,
-      },
-      children: [
-        new UIText(
-          new DerivedProperty([preGeneratedPuzzleReadyProperty, preGeneratingPuzzleProperty], (ready, generating) =>
-            ready ? 'Next puzzle ready'
-            : generating ? 'Generating next puzzle...'
-            : '',
-          ),
-        ),
-      ],
-    });
+    // Settings currently shown (see getPreGenerationKey), so the Generate button can reflect background generation
+    let currentSettings: { generator: PolygonGenerator; parameters: Record<string, any> } | null = null;
+    const currentKeyProperty = new TinyProperty<string | null>(null);
+    const updateCurrentKey = () => {
+      currentKeyProperty.value =
+        currentSettings ?
+          getPreGenerationKey(currentSettings.generator, currentSettings.parameters, canSolveDifficultyProperty.value)
+        : null;
+    };
+    canSolveDifficultyProperty.lazyLink(updateCurrentKey);
+
+    // Whether the Generate button's own generation (or wait for a background one) is in progress
+    const foregroundGeneratingProperty = new TinyProperty(false);
+
+    // Whether a puzzle with the current settings is ready, or being generated in the background
+    const matchingPreGenerationProperty = new DerivedProperty(
+      [currentKeyProperty, preGeneratedKeyProperty, preGeneratedPuzzleReadyProperty, preGeneratingPuzzleProperty],
+      (currentKey, preGeneratedKey, ready, generating) =>
+        currentKey !== null && currentKey === preGeneratedKey ?
+          ready ? 'ready'
+          : generating ? 'generating'
+          : null
+        : null,
+    );
+
+    // Disabled while generating, and "Start" when a puzzle with the current settings is ready
+    const generateButtonTextProperty = new DerivedProperty(
+      [matchingPreGenerationProperty, foregroundGeneratingProperty],
+      (matching, foregroundGenerating) => (matching === 'ready' && !foregroundGenerating ? 'Start' : 'Generate'),
+    );
+    const generateButtonEnabledProperty = new DerivedProperty(
+      [matchingPreGenerationProperty, foregroundGeneratingProperty],
+      (matching, foregroundGenerating) => !foregroundGenerating && matching !== 'generating',
+    );
 
     const propertiesControlsContainer = new HBox({
       spacing: 10,
@@ -221,9 +241,12 @@ export class GenerateNode extends HBox {
         }
       };
 
+      currentSettings = { generator, parameters };
+
       const update = () => {
         localStorage.setItem('polygonGeneratorParameters', JSON.stringify(parameters));
         setPreview(generator, parameters);
+        updateCurrentKey();
       };
 
       for (const [key, parameter] of Object.entries(generator.parameters)) {
@@ -325,127 +348,137 @@ export class GenerateNode extends HBox {
       usedInitialParameters = true;
 
       generateButtonContainer.addChild(
-        new UITextPushButton('Generate', {
+        new UITextPushButton(generateButtonTextProperty, {
           font: generateButtonFont,
           layoutOptions: {
             align: 'center',
           },
+          enabledProperty: generateButtonEnabledProperty,
           listener: async () => {
             interruptGenerateEmitter.emit();
 
-            const canSolveDifficulty = canSolveDifficultyProperty.value;
-
-            const loadGeneratedPuzzle = (solvedPuzzle: TSolvedPuzzle<TStructure, TCompleteData>) => {
-              options.loadPuzzle(BasicPuzzle.fromSolvedPuzzle(solvedPuzzle));
-
-              startPreGeneratingPuzzle(generator, parameters, canSolveDifficulty);
-            };
-
-            // Use a puzzle generated in the background with these settings, if available
-            const preGeneratedPuzzlePromise = takePreGeneratedPuzzle(generator, parameters, canSolveDifficulty);
-            if (preGeneratedPuzzlePromise) {
-              let interrupted = false;
-              const preGeneratedInterruptListener = () => {
-                interrupted = true;
-              };
-              interruptGenerateEmitter.addListener(preGeneratedInterruptListener);
-
-              const preGeneratedPuzzle = await preGeneratedPuzzlePromise;
-
-              if (interruptGenerateEmitter.hasListener(preGeneratedInterruptListener)) {
-                interruptGenerateEmitter.removeListener(preGeneratedInterruptListener);
-              }
-              if (interrupted) {
-                return;
-              }
-              if (preGeneratedPuzzle) {
-                loadGeneratedPuzzle(preGeneratedPuzzle);
-                return;
-              }
-            }
-
-            const polygons = generator.generate(parameters);
-
-            const board = PolygonGeneratorBoard.get(generator, parameters);
-
-            const interruptedProperty = new TinyProperty(false);
-
-            const interruptListener = () => {
-              interruptedProperty.value = true;
-            };
-            interruptGenerateEmitter.addListener(interruptListener);
-
-            const faceDefineEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
-            const faceMinimizeEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
-            const faceResetEmitter = new TinyEmitter();
-
-            faceResetEmitter.addListener(() => {
-              previewGeneratedNode.children = [];
-            });
-
-            faceDefineEmitter.addListener((index, state) => {
-              previewGeneratedNode.addChild(
-                new Path(Shape.polygon(polygons[index]), {
-                  fill: currentTheme.generateAddedFaceColorProperty,
-                  stroke: currentTheme.blackLineColorProperty,
-                  lineWidth: 0.05,
-                }),
-              );
-              if (state !== null) {
-                previewGeneratedNode.addChild(
-                  new Text(`${state}`, {
-                    font: generateButtonFont,
-                    fill: currentTheme.faceValueColorProperty,
-                    maxWidth: 0.9,
-                    maxHeight: 0.9,
-                    center: getCentroid(polygons[index]),
-                  }),
-                );
-              }
-            });
-
-            faceMinimizeEmitter.addListener((index, state) => {
-              previewGeneratedNode.addChild(
-                new Path(Shape.polygon(polygons[index]), {
-                  fill: currentTheme.generateMinimizedFaceColorProperty,
-                  stroke: currentTheme.blackLineColorProperty,
-                  lineWidth: 0.05,
-                }),
-              );
-              if (state !== null) {
-                previewGeneratedNode.addChild(
-                  new Text(`${state}`, {
-                    font: generateButtonFont,
-                    fill: currentTheme.faceValueColorProperty,
-                    maxWidth: 0.9,
-                    maxHeight: 0.9,
-                    center: getCentroid(polygons[index]),
-                  }),
-                );
-              }
-            });
-
-            // const minimizedPuzzle = await generateAdditiveConstrained(
-            const minimizedPuzzle = await generateAdditiveConstrainedWithWorker(
-              board,
-              canSolveDifficulty,
-              interruptedProperty,
-              faceDefineEmitter,
-              faceMinimizeEmitter,
-              faceResetEmitter,
-            );
-
-            if (minimizedPuzzle) {
-              previewGeneratedNode.children = [];
-              loadGeneratedPuzzle(minimizedPuzzle);
-            }
-
-            if (interruptGenerateEmitter.hasListener(interruptListener)) {
-              interruptGenerateEmitter.removeListener(interruptListener);
+            foregroundGeneratingProperty.value = true;
+            try {
+              await generate();
+            } finally {
+              foregroundGeneratingProperty.value = false;
             }
           },
         }),
       );
+
+      const generate = async () => {
+        const canSolveDifficulty = canSolveDifficultyProperty.value;
+
+        const loadGeneratedPuzzle = (solvedPuzzle: TSolvedPuzzle<TStructure, TCompleteData>) => {
+          options.loadPuzzle(BasicPuzzle.fromSolvedPuzzle(solvedPuzzle));
+
+          startPreGeneratingPuzzle(generator, parameters, canSolveDifficulty);
+        };
+
+        // Use a puzzle generated in the background with these settings, if available
+        const preGeneratedPuzzlePromise = takePreGeneratedPuzzle(generator, parameters, canSolveDifficulty);
+        if (preGeneratedPuzzlePromise) {
+          let interrupted = false;
+          const preGeneratedInterruptListener = () => {
+            interrupted = true;
+          };
+          interruptGenerateEmitter.addListener(preGeneratedInterruptListener);
+
+          const preGeneratedPuzzle = await preGeneratedPuzzlePromise;
+
+          if (interruptGenerateEmitter.hasListener(preGeneratedInterruptListener)) {
+            interruptGenerateEmitter.removeListener(preGeneratedInterruptListener);
+          }
+          if (interrupted) {
+            return;
+          }
+          if (preGeneratedPuzzle) {
+            loadGeneratedPuzzle(preGeneratedPuzzle);
+            return;
+          }
+        }
+
+        const polygons = generator.generate(parameters);
+
+        const board = PolygonGeneratorBoard.get(generator, parameters);
+
+        const interruptedProperty = new TinyProperty(false);
+
+        const interruptListener = () => {
+          interruptedProperty.value = true;
+        };
+        interruptGenerateEmitter.addListener(interruptListener);
+
+        const faceDefineEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
+        const faceMinimizeEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
+        const faceResetEmitter = new TinyEmitter();
+
+        faceResetEmitter.addListener(() => {
+          previewGeneratedNode.children = [];
+        });
+
+        faceDefineEmitter.addListener((index, state) => {
+          previewGeneratedNode.addChild(
+            new Path(Shape.polygon(polygons[index]), {
+              fill: currentTheme.generateAddedFaceColorProperty,
+              stroke: currentTheme.blackLineColorProperty,
+              lineWidth: 0.05,
+            }),
+          );
+          if (state !== null) {
+            previewGeneratedNode.addChild(
+              new Text(`${state}`, {
+                font: generateButtonFont,
+                fill: currentTheme.faceValueColorProperty,
+                maxWidth: 0.9,
+                maxHeight: 0.9,
+                center: getCentroid(polygons[index]),
+              }),
+            );
+          }
+        });
+
+        faceMinimizeEmitter.addListener((index, state) => {
+          previewGeneratedNode.addChild(
+            new Path(Shape.polygon(polygons[index]), {
+              fill: currentTheme.generateMinimizedFaceColorProperty,
+              stroke: currentTheme.blackLineColorProperty,
+              lineWidth: 0.05,
+            }),
+          );
+          if (state !== null) {
+            previewGeneratedNode.addChild(
+              new Text(`${state}`, {
+                font: generateButtonFont,
+                fill: currentTheme.faceValueColorProperty,
+                maxWidth: 0.9,
+                maxHeight: 0.9,
+                center: getCentroid(polygons[index]),
+              }),
+            );
+          }
+        });
+
+        // const minimizedPuzzle = await generateAdditiveConstrained(
+        const minimizedPuzzle = await generateAdditiveConstrainedWithWorker(
+          board,
+          canSolveDifficulty,
+          interruptedProperty,
+          faceDefineEmitter,
+          faceMinimizeEmitter,
+          faceResetEmitter,
+        );
+
+        if (minimizedPuzzle) {
+          previewGeneratedNode.children = [];
+          loadGeneratedPuzzle(minimizedPuzzle);
+        }
+
+        if (interruptGenerateEmitter.hasListener(interruptListener)) {
+          interruptGenerateEmitter.removeListener(interruptListener);
+        }
+      };
     });
 
     const previewRectangle = new Rectangle({
@@ -495,7 +528,6 @@ export class GenerateNode extends HBox {
               generateButtonContainer,
               new HSeparator(),
               difficultyControlsContainer,
-              preGenerateControlsContainer,
               new HSeparator(),
               propertiesControlsContainer,
             ],

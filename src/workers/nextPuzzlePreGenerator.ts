@@ -43,10 +43,13 @@ let preGenerated: PreGeneratedPuzzle | null = null;
 // Whether a pre-generated puzzle is ready, or one is being generated
 export const preGeneratedPuzzleReadyProperty = new TinyProperty(false);
 export const preGeneratingPuzzleProperty = new TinyProperty(false);
+// The settings (see getPreGenerationKey) of the puzzle that is ready or being generated
+export const preGeneratedKeyProperty = new TinyProperty<string | null>(null);
 
 const updateStatus = () => {
   preGeneratedPuzzleReadyProperty.value = !!preGenerated?.ready;
   preGeneratingPuzzleProperty.value = !!preGenerated && !preGenerated.ready;
+  preGeneratedKeyProperty.value = preGenerated?.key ?? null;
 };
 
 const storeGenerationState = (
@@ -89,7 +92,7 @@ const loadGenerationState = (): StoredGenerationState | null => {
 };
 
 // Snapshots the settings, since parameters objects can be mutated after this is called
-const getPreGenerationKey = (
+export const getPreGenerationKey = (
   generator: PolygonGenerator,
   parameters: Record<string, any>,
   canSolveDifficulty: CanSolveDifficulty,
