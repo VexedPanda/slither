@@ -24,11 +24,15 @@ export const greedyFaceMinimize = async <Structure extends TStructure, Data exte
   isEasyEnough: (board: TBoard, state: TState<Data>) => boolean = () => true,
   interruptedProperty?: TReadOnlyProperty<boolean>,
   faceProcessedEmitter?: TEmitter<[index: number, state: FaceValue]>,
+  // Faces that were already processed (e.g. resuming an interrupted minimize), which won't be processed again
+  processedFaces?: Set<TFace>,
 ): Promise<TSolvedPuzzle<Structure, Data>> => {
   const board = solvedPuzzle.board;
   const state = solvedPuzzle.cleanState.clone();
 
-  const faceOrder: TFace[] = dotRandom.shuffle(board.faces);
+  const faceOrder: TFace[] = dotRandom.shuffle(
+    processedFaces ? board.faces.filter((face) => !processedFaces.has(face)) : board.faces,
+  );
 
   const knownSolutions = KnownSolutions.get(board);
 

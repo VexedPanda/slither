@@ -40,6 +40,7 @@ import { LocalStorageProperty } from '../util/localStorage.ts';
 import { generateAdditiveConstrainedWithWorker } from '../workers/getGenerationAdditiveConstrainedWorker.ts';
 import {
   GenerationProgressEvent,
+  GenerationProgressRecorder,
   getPreGenerationKey,
   getPreGenerationProgress,
   preGeneratedKeyProperty,
@@ -452,11 +453,16 @@ export class GenerateNode extends HBox {
         const faceMinimizeEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
         const faceResetEmitter = new TinyEmitter();
 
-        faceResetEmitter.addListener(() => showProgressEvent(polygons, { type: 'reset' }));
-        faceDefineEmitter.addListener((index, state) => showProgressEvent(polygons, { type: 'define', index, state }));
-        faceMinimizeEmitter.addListener((index, state) =>
-          showProgressEvent(polygons, { type: 'minimize', index, state }),
-        );
+        // Persisted, so that if the page is closed, generation continues in the background on the next load
+        const recorder = new GenerationProgressRecorder(generator, { ...parameters }, canSolveDifficulty);
+        const onProgress = (event: GenerationProgressEvent) => {
+          recorder.record(event);
+          showProgressEvent(polygons, event);
+        };
+
+        faceResetEmitter.addListener(() => onProgress({ type: 'reset' }));
+        faceDefineEmitter.addListener((index, state) => onProgress({ type: 'define', index, state }));
+        faceMinimizeEmitter.addListener((index, state) => onProgress({ type: 'minimize', index, state }));
 
         // const minimizedPuzzle = await generateAdditiveConstrained(
         const minimizedPuzzle = await generateAdditiveConstrainedWithWorker(
@@ -467,6 +473,8 @@ export class GenerateNode extends HBox {
           faceMinimizeEmitter,
           faceResetEmitter,
         );
+
+        recorder.stop();
 
         if (minimizedPuzzle) {
           previewGeneratedNode.children = [];
