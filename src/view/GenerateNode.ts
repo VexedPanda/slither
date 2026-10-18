@@ -16,7 +16,7 @@ import {
   TinyEmitter,
   TinyProperty,
 } from 'scenerystack/axon';
-import { Dimension2 } from 'scenerystack/dot';
+import { Dimension2, Vector2 } from 'scenerystack/dot';
 import { Shape } from 'scenerystack/kite';
 import { optionize } from 'scenerystack/phet-core';
 import { HBox, HBoxOptions, HSeparator, Node, Path, Rectangle, Text, VBox } from 'scenerystack/scenery';
@@ -39,10 +39,13 @@ import { LocalStorageProperty } from '../util/localStorage.ts';
 
 import { generateAdditiveConstrainedWithWorker } from '../workers/getGenerationAdditiveConstrainedWorker.ts';
 import {
+  GenerationProgressEvent,
   getPreGenerationKey,
+  getPreGenerationProgress,
   preGeneratedKeyProperty,
   preGeneratedPuzzleReadyProperty,
   preGeneratingPuzzleProperty,
+  preGenerationProgressEmitter,
   startPreGeneratingPuzzle,
   takePreGeneratedPuzzle,
 } from '../workers/nextPuzzlePreGenerator.ts';
@@ -205,9 +208,44 @@ export class GenerateNode extends HBox {
       children: [previewBoardNode, previewGeneratedNode],
     });
 
+    // Polygons of the board currently previewed
+    let previewPolygons: Vector2[][] = [];
+
+    // Shows a generation progress event (from foreground or background generation) on the preview
+    const showProgressEvent = (polygons: Vector2[][], event: GenerationProgressEvent) => {
+      if (event.type === 'reset') {
+        previewGeneratedNode.children = [];
+        return;
+      }
+
+      const polygon = polygons[event.index];
+      previewGeneratedNode.addChild(
+        new Path(Shape.polygon(polygon), {
+          fill:
+            event.type === 'define' ?
+              currentTheme.generateAddedFaceColorProperty
+            : currentTheme.generateMinimizedFaceColorProperty,
+          stroke: currentTheme.blackLineColorProperty,
+          lineWidth: 0.05,
+        }),
+      );
+      if (event.state !== null) {
+        previewGeneratedNode.addChild(
+          new Text(`${event.state}`, {
+            font: generateButtonFont,
+            fill: currentTheme.faceValueColorProperty,
+            maxWidth: 0.9,
+            maxHeight: 0.9,
+            center: getCentroid(polygon),
+          }),
+        );
+      }
+    };
+
     const setPreview = (generator: PolygonGenerator, parameters: Record<string, any>) => {
       // TODO: switch to a Property<Vector2[][]>, so we can remove them. We'll display them efficiently here
       const polygons = generator.generate(parameters);
+      previewPolygons = polygons;
 
       const shape = new Shape();
       polygons.forEach((polygon) => shape.polygon(polygon));
@@ -414,51 +452,11 @@ export class GenerateNode extends HBox {
         const faceMinimizeEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
         const faceResetEmitter = new TinyEmitter();
 
-        faceResetEmitter.addListener(() => {
-          previewGeneratedNode.children = [];
-        });
-
-        faceDefineEmitter.addListener((index, state) => {
-          previewGeneratedNode.addChild(
-            new Path(Shape.polygon(polygons[index]), {
-              fill: currentTheme.generateAddedFaceColorProperty,
-              stroke: currentTheme.blackLineColorProperty,
-              lineWidth: 0.05,
-            }),
-          );
-          if (state !== null) {
-            previewGeneratedNode.addChild(
-              new Text(`${state}`, {
-                font: generateButtonFont,
-                fill: currentTheme.faceValueColorProperty,
-                maxWidth: 0.9,
-                maxHeight: 0.9,
-                center: getCentroid(polygons[index]),
-              }),
-            );
-          }
-        });
-
-        faceMinimizeEmitter.addListener((index, state) => {
-          previewGeneratedNode.addChild(
-            new Path(Shape.polygon(polygons[index]), {
-              fill: currentTheme.generateMinimizedFaceColorProperty,
-              stroke: currentTheme.blackLineColorProperty,
-              lineWidth: 0.05,
-            }),
-          );
-          if (state !== null) {
-            previewGeneratedNode.addChild(
-              new Text(`${state}`, {
-                font: generateButtonFont,
-                fill: currentTheme.faceValueColorProperty,
-                maxWidth: 0.9,
-                maxHeight: 0.9,
-                center: getCentroid(polygons[index]),
-              }),
-            );
-          }
-        });
+        faceResetEmitter.addListener(() => showProgressEvent(polygons, { type: 'reset' }));
+        faceDefineEmitter.addListener((index, state) => showProgressEvent(polygons, { type: 'define', index, state }));
+        faceMinimizeEmitter.addListener((index, state) =>
+          showProgressEvent(polygons, { type: 'minimize', index, state }),
+        );
 
         // const minimizedPuzzle = await generateAdditiveConstrained(
         const minimizedPuzzle = await generateAdditiveConstrainedWithWorker(
@@ -479,6 +477,27 @@ export class GenerateNode extends HBox {
           interruptGenerateEmitter.removeListener(interruptListener);
         }
       };
+    });
+
+    // Show the progress of background generation for the current settings (including what happened before this was
+    // shown), as if it were generating in the foreground
+    let showingBackgroundProgress = false;
+    Multilink.multilink([currentKeyProperty, matchingPreGenerationProperty], (currentKey, matching) => {
+      if (showingBackgroundProgress) {
+        previewGeneratedNode.children = [];
+        showingBackgroundProgress = false;
+      }
+      if (currentKey !== null && matching === 'generating') {
+        showingBackgroundProgress = true;
+        for (const event of getPreGenerationProgress(currentKey) ?? []) {
+          showProgressEvent(previewPolygons, event);
+        }
+      }
+    });
+    preGenerationProgressEmitter.addListener((key, event) => {
+      if (showingBackgroundProgress && key === currentKeyProperty.value) {
+        showProgressEvent(previewPolygons, event);
+      }
     });
 
     const previewRectangle = new Rectangle({

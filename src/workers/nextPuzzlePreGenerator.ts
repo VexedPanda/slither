@@ -21,7 +21,12 @@ type PreGeneratedPuzzle = {
   interruptedProperty: TinyProperty<boolean>;
   getPuzzle: () => Promise<TSolvedPuzzle<TStructure, TCompleteData> | null>;
   ready: boolean;
+  // Progress so far (since the last reset), so a view opened mid-generation can catch up
+  progress: GenerationProgressEvent[];
 };
+
+export type GenerationProgressEvent =
+  { type: 'define' | 'minimize'; index: number; state: FaceValue } | { type: 'reset' };
 
 // Persisted to localStorage, so that generation can resume (or a finished puzzle can be used) after a reload
 type StoredGenerationState = {
@@ -45,6 +50,13 @@ export const preGeneratedPuzzleReadyProperty = new TinyProperty(false);
 export const preGeneratingPuzzleProperty = new TinyProperty(false);
 // The settings (see getPreGenerationKey) of the puzzle that is ready or being generated
 export const preGeneratedKeyProperty = new TinyProperty<string | null>(null);
+// Progress of background generation, with the key of the puzzle being generated
+export const preGenerationProgressEmitter = new TinyEmitter<[key: string, event: GenerationProgressEvent]>();
+
+// Progress so far for a puzzle being generated in the background with these settings (null if there is none)
+export const getPreGenerationProgress = (key: string): GenerationProgressEvent[] | null => {
+  return preGenerated?.key === key && !preGenerated.ready ? [...preGenerated.progress] : null;
+};
 
 const updateStatus = () => {
   preGeneratedPuzzleReadyProperty.value = !!preGenerated?.ready;
@@ -127,20 +139,35 @@ export const startPreGeneratingPuzzle = (
   const board = PolygonGeneratorBoard.get(generator, parameters);
   const interruptedProperty = new TinyProperty(false);
 
+  const progress: GenerationProgressEvent[] = [];
+  const onProgress = (event: GenerationProgressEvent) => {
+    if (event.type === 'reset') {
+      progress.length = 0;
+    }
+    progress.push(event);
+    preGenerationProgressEmitter.emit(key, event);
+  };
+  const faceDefineEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
+  const faceMinimizeEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
+  const faceResetEmitter = new TinyEmitter();
+  faceDefineEmitter.addListener((index, state) => onProgress({ type: 'define', index, state }));
+  faceMinimizeEmitter.addListener((index, state) => onProgress({ type: 'minimize', index, state }));
+  faceResetEmitter.addListener(() => onProgress({ type: 'reset' }));
+
   const promise = generateAdditiveConstrainedWithWorker(
     board,
     canSolveDifficulty,
     interruptedProperty,
-    // Progress is not displayed for background generation
-    new TinyEmitter<[index: number, state: FaceValue]>(),
-    new TinyEmitter<[index: number, state: FaceValue]>(),
-    new TinyEmitter(),
+    faceDefineEmitter,
+    faceMinimizeEmitter,
+    faceResetEmitter,
   );
   const entry: PreGeneratedPuzzle = {
     key: key,
     interruptedProperty: interruptedProperty,
     getPuzzle: () => promise,
     ready: false,
+    progress: progress,
   };
   preGenerated = entry;
   updateStatus();
@@ -256,6 +283,7 @@ export const resumePreGeneration = (): void => {
         }
       },
       ready: true,
+      progress: [],
     };
     updateStatus();
     return;
