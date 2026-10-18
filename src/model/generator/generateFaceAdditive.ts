@@ -30,14 +30,21 @@ export const generateFaceAdditive = async (
   board: TBoard,
   interruptedProperty?: TReadOnlyProperty<boolean>,
   faceProcessedEmitter?: TEmitter<[index: number, state: FaceValue]>,
+  // Face values to start the first attempt with (e.g. resuming an interrupted generation). Must have a solution.
+  initialFaceValues?: Map<TFace, FaceValue>,
 ): Promise<TSolvedPuzzle<TStructure, TCompleteData>> => {
   const knownSolutions = KnownSolutions.get(board);
 
   let iterations = 0;
   while (iterations++ < 100) {
-    const state = CompleteData.fromFaces(board, () => null);
+    const initialValues = iterations === 1 ? initialFaceValues : undefined;
+    // Values are set (instead of using fromFaces with them) so the face states stay unconstrained
+    const state = CompleteData.empty(board);
+    initialValues?.forEach((value, face) => state.setFaceValue(face, value));
 
-    const faceOrder: TFace[] = dotRandom.shuffle(board.faces);
+    const faceOrder: TFace[] = dotRandom.shuffle(
+      initialValues ? board.faces.filter((face) => state.getFaceValue(face) === null) : board.faces,
+    );
 
     let solutionCount: number = -1; // will get filled in later, TS is annoyed
     let solutions: TEdge[][] = [];
@@ -70,8 +77,15 @@ export const generateFaceAdditive = async (
       }
     };
 
+    if (initialValues) {
+      solutionCount = getSolutionCount(state);
+      if (solutionCount === 0) {
+        throw new Error('Initial face values have no solution');
+      }
+    }
+
     // TODO: faster approach might try adding multiple faces at once before trying to solve (maybe that isn't faster)
-    for (const face of faceOrder) {
+    for (const face of solutionCount === 1 ? [] : faceOrder) {
       debugSleep && console.log('going to sleep');
       interruptedProperty && (await interruptableSleep(0, interruptedProperty));
       debugSleep && console.log('finished sleep, generating next!');

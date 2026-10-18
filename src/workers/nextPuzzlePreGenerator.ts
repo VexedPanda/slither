@@ -10,6 +10,7 @@ import { TCompleteData } from '../model/data/combined/TCompleteData.ts';
 import { deserializeState } from '../model/data/core/deserializeState.ts';
 import FaceValue from '../model/data/face-value/FaceValue.ts';
 import CanSolveDifficulty from '../model/generator/CanSolveDifficulty.ts';
+import { GenerationProgressEvent } from '../model/generator/GenerationProgressEvent.ts';
 import { TSolvedPuzzle } from '../model/generator/TSolvedPuzzle.ts';
 import { canSolveDifficultyProperty } from '../model/generator/canSolveDifficultyProperty.ts';
 import { getSolvedPuzzle } from '../model/generator/getSolvedPuzzle.ts';
@@ -25,8 +26,7 @@ type PreGeneratedPuzzle = {
   progress: GenerationProgressEvent[];
 };
 
-export type GenerationProgressEvent =
-  { type: 'define' | 'minimize'; index: number; state: FaceValue } | { type: 'reset' };
+export type { GenerationProgressEvent };
 
 // Persisted to localStorage, so that generation can resume (or a finished puzzle can be used) after a reload
 type StoredGenerationState = {
@@ -38,7 +38,13 @@ type StoredGenerationState = {
   puzzle: string | null;
   // Generation with these settings failed, so don't retry on load
   failed?: boolean;
+  // Compressed JSON of the unfinished generation's progress since the last reset (see GenerationProgressRecorder), so
+  // it can continue where it left off
+  progress?: string;
 };
+
+// Compact form of a GenerationProgressEvent for storage
+type StoredProgressEvent = ['d' | 'm', number, FaceValue];
 
 const STORAGE_KEY = 'nextPuzzleGenerationState';
 
@@ -70,7 +76,12 @@ const storeGenerationState = (
   canSolveDifficulty: CanSolveDifficulty,
   solvedPuzzle: TSolvedPuzzle<TStructure, TCompleteData> | null,
   failed = false,
+  progress: GenerationProgressEvent[] = [],
 ): void => {
+  if (!progress.length) {
+    // Replaced by other generation state
+    currentRecorder?.stop();
+  }
   try {
     const state: StoredGenerationState = {
       generator: generator.name,
@@ -86,6 +97,16 @@ const storeGenerationState = (
           )
         : null,
       failed: failed,
+      progress:
+        progress.length ?
+          compressString2(
+            JSON.stringify(
+              progress.flatMap((event): StoredProgressEvent[] =>
+                event.type === 'reset' ? [] : [[event.type === 'define' ? 'd' : 'm', event.index, event.state]],
+              ),
+            ),
+          )
+        : undefined,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch (e) {
@@ -93,6 +114,83 @@ const storeGenerationState = (
     console.warn('Failed to persist puzzle generation state', e);
   }
 };
+
+const loadProgress = (state: StoredGenerationState): GenerationProgressEvent[] => {
+  try {
+    const events: StoredProgressEvent[] = state.progress ? JSON.parse(decompressString2(state.progress)!) : [];
+    return events.map(([type, index, faceValue]) => ({
+      type: type === 'd' ? 'define' : 'minimize',
+      index: index,
+      state: faceValue,
+    }));
+  } catch (e) {
+    console.warn('Failed to restore puzzle generation progress', e);
+    return [];
+  }
+};
+
+/**
+ * Records the progress of a generation (since the last reset) and persists it (throttled), so that if the page is
+ * closed, generation can continue where it left off. Only the most recently created recorder persists anything, and
+ * storing other generation state (e.g. a finished puzzle) stops it.
+ */
+export class GenerationProgressRecorder {
+  private storeTimeout: ReturnType<typeof setTimeout> | null = null;
+
+  public constructor(
+    private readonly generator: PolygonGenerator,
+    private readonly parameters: Record<string, any>,
+    private readonly canSolveDifficulty: CanSolveDifficulty,
+    public readonly progress: GenerationProgressEvent[] = [],
+  ) {
+    currentRecorder?.stop();
+    currentRecorder = this;
+  }
+
+  public record(event: GenerationProgressEvent): void {
+    if (event.type === 'reset') {
+      this.progress.length = 0;
+    }
+    this.progress.push(event);
+
+    if (currentRecorder === this && this.storeTimeout === null) {
+      this.storeTimeout = setTimeout(() => this.flush(), 500);
+    }
+  }
+
+  public flush(): void {
+    if (this.storeTimeout !== null) {
+      clearTimeout(this.storeTimeout);
+      this.storeTimeout = null;
+    }
+    // With no progress, the settings are already stored (and storing without progress would stop this recorder)
+    if (currentRecorder === this && this.progress.length) {
+      storeGenerationState(this.generator, this.parameters, this.canSolveDifficulty, null, false, this.progress);
+    }
+  }
+
+  public stop(): void {
+    if (this.storeTimeout !== null) {
+      clearTimeout(this.storeTimeout);
+      this.storeTimeout = null;
+    }
+    if (currentRecorder === this) {
+      currentRecorder = null;
+    }
+  }
+}
+
+let currentRecorder: GenerationProgressRecorder | null = null;
+
+// Don't lose the latest (throttled) progress when the page is closed
+if (typeof window !== 'undefined') {
+  window.addEventListener('pagehide', () => currentRecorder?.flush());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      currentRecorder?.flush();
+    }
+  });
+}
 
 const loadGenerationState = (): StoredGenerationState | null => {
   try {
@@ -125,6 +223,8 @@ export const startPreGeneratingPuzzle = (
   generator: PolygonGenerator,
   parameters: Record<string, any>,
   canSolveDifficulty: CanSolveDifficulty,
+  // Progress of an interrupted generation with these settings to continue from
+  resumeProgress: GenerationProgressEvent[] = [],
 ): void => {
   const key = getPreGenerationKey(generator, parameters, canSolveDifficulty);
 
@@ -135,16 +235,17 @@ export const startPreGeneratingPuzzle = (
 
   parameters = { ...parameters };
   storeGenerationState(generator, parameters, canSolveDifficulty, null);
+  const recorder = new GenerationProgressRecorder(generator, parameters, canSolveDifficulty, [...resumeProgress]);
+  if (resumeProgress.length) {
+    // Keep the progress stored, even if the page is closed before there is more
+    recorder.flush();
+  }
 
   const board = PolygonGeneratorBoard.get(generator, parameters);
   const interruptedProperty = new TinyProperty(false);
 
-  const progress: GenerationProgressEvent[] = [];
   const onProgress = (event: GenerationProgressEvent) => {
-    if (event.type === 'reset') {
-      progress.length = 0;
-    }
-    progress.push(event);
+    recorder.record(event);
     preGenerationProgressEmitter.emit(key, event);
   };
   const faceDefineEmitter = new TinyEmitter<[index: number, state: FaceValue]>();
@@ -161,18 +262,20 @@ export const startPreGeneratingPuzzle = (
     faceDefineEmitter,
     faceMinimizeEmitter,
     faceResetEmitter,
+    resumeProgress,
   );
   const entry: PreGeneratedPuzzle = {
     key: key,
     interruptedProperty: interruptedProperty,
     getPuzzle: () => promise,
     ready: false,
-    progress: progress,
+    progress: recorder.progress,
   };
   preGenerated = entry;
   updateStatus();
 
   promise.then((result) => {
+    recorder.stop();
     if (preGenerated === entry) {
       if (result) {
         entry.ready = true;
@@ -242,8 +345,8 @@ const getGenerateNodeSettings = (): StoredGenerationState => {
 };
 
 /**
- * Restores the persisted generation state: a finished puzzle is made ready immediately, otherwise generation is restarted with the last-used settings (in-progress worker state is not
- * persisted, so an unfinished generation starts over).
+ * Restores the persisted generation state: a finished puzzle is made ready immediately, otherwise generation continues
+ * (from its recorded progress) with the last-used settings.
  */
 export const resumePreGeneration = (): void => {
   if (preGenerated) {
@@ -289,5 +392,5 @@ export const resumePreGeneration = (): void => {
     return;
   }
 
-  startPreGeneratingPuzzle(generator, state.parameters, canSolveDifficulty);
+  startPreGeneratingPuzzle(generator, state.parameters, canSolveDifficulty, loadProgress(state));
 };

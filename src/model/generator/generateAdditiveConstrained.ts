@@ -1,11 +1,16 @@
 import { TBoard } from '../board/core/TBoard.ts';
+import { TFace } from '../board/core/TFace.ts';
 import { TStructure } from '../board/core/TStructure.ts';
+import { CompleteData } from '../data/combined/CompleteData.ts';
 import { TCompleteData } from '../data/combined/TCompleteData.ts';
 import FaceValue from '../data/face-value/FaceValue.ts';
+import { incrementalSatSolve } from '../solver/IncrementalSATSolver.ts';
 import { InterruptedError } from '../solver/errors/InterruptedError.ts';
 import CanSolveDifficulty from './CanSolveDifficulty.ts';
+import { GenerationProgressEvent } from './GenerationProgressEvent.ts';
 import { TSolvedPuzzle } from './TSolvedPuzzle.ts';
 import { generateFaceAdditive } from './generateFaceAdditive.ts';
+import { getSolvedPuzzle } from './getSolvedPuzzle.ts';
 import { greedyFaceMinimize } from './greedyFaceMinimize.ts';
 import { withAllFacesFilled } from './withAllFacesFilled.ts';
 
@@ -20,11 +25,82 @@ export const generateAdditiveConstrained = async (
   faceDefineEmitter: TEmitter<[index: number, state: FaceValue]>,
   faceMinimizeEmitter: TEmitter<[index: number, state: FaceValue]>,
   faceResetEmitter: TEmitter,
+  // Progress (since the last reset) of an earlier, interrupted generation to continue from. These events are not
+  // emitted again.
+  resumeProgress: GenerationProgressEvent[] = [],
 ): Promise<TSolvedPuzzle<TStructure, TCompleteData> | null> => {
   try {
     const canSolve = canSolveDifficulty.canSolve;
 
+    // Reconstruct the interrupted generation's state (the latest value wins, since a generation attempt can be retried
+    // without a reset)
+    const definedValues = new Map<TFace, FaceValue>();
+    const minimizedValues = new Map<TFace, FaceValue>();
+    for (const event of resumeProgress) {
+      if (event.type === 'reset') {
+        definedValues.clear();
+        minimizedValues.clear();
+      } else {
+        const face = board.faces[event.index];
+        if (face) {
+          (event.type === 'define' ? definedValues : minimizedValues).set(face, event.state);
+        }
+      }
+    }
+
+    // If it was interrupted while minimizing, continue minimizing (the puzzle being minimized already passed the checks)
+    if (minimizedValues.size) {
+      try {
+        // Set the values (instead of using fromFaces with them) so that the face states stay unconstrained, as in a
+        // generated puzzle
+        const cleanState = CompleteData.empty(board);
+        for (const face of board.faces) {
+          cleanState.setFaceValue(
+            face,
+            minimizedValues.has(face) ? minimizedValues.get(face)! : (definedValues.get(face) ?? null),
+          );
+        }
+        const solutions = incrementalSatSolve(board, cleanState, {
+          maxIterations: 10000,
+          failOnMultipleSolutions: true,
+        });
+        if (solutions.length === 1 && canSolve(board, cleanState.clone())) {
+          return await greedyFaceMinimize(
+            getSolvedPuzzle(board, cleanState, solutions[0]),
+            canSolve,
+            interruptedProperty,
+            faceMinimizeEmitter,
+            new Set(minimizedValues.keys()),
+          );
+        }
+      } catch (e) {
+        if (e instanceof InterruptedError) {
+          throw e;
+        }
+        console.warn('Failed to resume minimizing', e);
+      }
+      // Couldn't resume, start over
+      faceResetEmitter.emit();
+      definedValues.clear();
+    }
+
+    let initialFaceValues = definedValues.size ? definedValues : undefined;
+
     const getUniquePuzzle = async () => {
+      const faceValues = initialFaceValues;
+      initialFaceValues = undefined;
+
+      if (faceValues) {
+        try {
+          return await generateFaceAdditive(board, interruptedProperty, faceDefineEmitter, faceValues);
+        } catch (e) {
+          if (e instanceof InterruptedError) {
+            throw e;
+          }
+          console.warn('Failed to resume generation', e);
+          faceResetEmitter.emit();
+        }
+      }
       return await generateFaceAdditive(board, interruptedProperty, faceDefineEmitter);
     };
 

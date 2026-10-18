@@ -68,6 +68,7 @@ self.addEventListener('message', async (event) => {
         faceDefineEmitter,
         faceMinimizeEmitter,
         faceResetEmitter,
+        data.resumeProgress,
       );
 
       self.postMessage({
@@ -76,6 +77,8 @@ self.addEventListener('message', async (event) => {
         solvedPuzzle: result ? serializeSolvedPuzzle(result) : null,
       });
     } catch (e) {
+      console.error('Puzzle generation failed', e);
+
       // If we encounter a failure, send back a null
       self.postMessage({
         type: 'generation-additive-constrained-response',

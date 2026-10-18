@@ -8,6 +8,7 @@ import { serializeBoard } from '../model/board/core/serializeBoard.ts';
 import { TCompleteData } from '../model/data/combined/TCompleteData.ts';
 import FaceValue from '../model/data/face-value/FaceValue.ts';
 import CanSolveDifficulty from '../model/generator/CanSolveDifficulty.ts';
+import { GenerationProgressEvent } from '../model/generator/GenerationProgressEvent.ts';
 import { TSerializedSolvedPuzzle, TSolvedPuzzle } from '../model/generator/TSolvedPuzzle.ts';
 import { deserializeSolvedPuzzle } from '../model/generator/deserializeSolvedPuzzle.ts';
 
@@ -39,6 +40,8 @@ export const generateAdditiveConstrainedWithWorker = async (
   faceDefineEmitter: TEmitter<[index: number, state: FaceValue]>,
   faceMinimizeEmitter: TEmitter<[index: number, state: FaceValue]>,
   faceResetEmitter: TEmitter,
+  // Progress of an interrupted generation to continue from (see generateAdditiveConstrained)
+  resumeProgress: GenerationProgressEvent[] = [],
 ): Promise<TSolvedPuzzle<TStructure, TCompleteData> | null> => {
   return new Promise((resolve, reject) => {
     const worker = getGenerationAdditiveConstrainedWorker();
@@ -50,6 +53,7 @@ export const generateAdditiveConstrainedWithWorker = async (
       id: id,
       board: serializeBoard(board),
       canSolveDifficulty: canSolveDifficulty.name,
+      resumeProgress: resumeProgress,
     });
 
     const cleanup = () => {
