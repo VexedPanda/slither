@@ -248,6 +248,19 @@ export const incrementalSatSolve = (
       solverMap.set(board, solver);
     }
 
-    return solver.solve(state, options);
+    try {
+      return solver.solve(state, options);
+    } catch (e) {
+      if (e instanceof MultipleSolutionsError || e instanceof MaximumSolverIterationsError) {
+        throw e;
+      }
+
+      // e.g. MiniSat ran out of its fixed-size heap (an Emscripten abort), which leaves the solver unusable. Retry once
+      // with a new solver, which doesn't have the retired clauses.
+      console.warn('Incremental SAT solve failed, retrying with a new solver', e);
+      solver = new IncrementalSATSolver(board);
+      solverMap.set(board, solver);
+      return solver.solve(state, options);
+    }
   });
 };
