@@ -15,8 +15,10 @@
   gh pr create --repo VexedPanda/slither --base main --head <branch> ...
   ```
   Always pass `--repo VexedPanda/slither` to `gh pr` commands; without it `gh` targets the upstream parent.
-- **Branches and PRs:** use `claude/*` branches. Merge PRs with a merge commit once CI (build, lint, typecheck, qunit,
-  consistency) passes.
+- **Branches and PRs:** use `claude/*` branches. Always open a PR for finished work and enable auto-merge
+  (`gh pr merge <n> --repo VexedPanda/slither --auto --merge`), so it merges with a merge commit once CI (build, lint,
+  typecheck, qunit, consistency) passes. No approval is needed before pushing, opening or merging; only stop to ask if
+  CI fails in a way you can't fix.
 
 ## Checks
 
