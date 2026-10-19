@@ -24,20 +24,14 @@ export const getEmbeddingTouchIndex = (embeddings: Embedding[]): EmbeddingTouchI
     };
 
     embeddings.forEach((embedding, embeddingIndex) => {
-      for (const face of embedding.getFaceMap().values()) {
-        add(result.faces, face.index, embeddingIndex);
-      }
-      for (const edge of embedding.getNonExitEdgeMap().values()) {
-        add(result.edges, edge.index, embeddingIndex);
-      }
-      for (const edges of embedding.getExitEdgeMap().values()) {
-        for (const edge of edges) {
-          add(result.edges, edge.index, embeddingIndex);
+      embedding.mappedFaceIndices.forEach((faceIndex) => add(result.faces, faceIndex, embeddingIndex));
+      embedding.mappedNonExitEdgeIndices.forEach((edgeIndex) => add(result.edges, edgeIndex, embeddingIndex));
+      embedding.mappedExitEdgeIndices.forEach((edgeIndices) => {
+        for (const edgeIndex of edgeIndices) {
+          add(result.edges, edgeIndex, embeddingIndex);
         }
-      }
-      for (const sector of embedding.getSectorMap().values()) {
-        add(result.sectors, sector.index, embeddingIndex);
-      }
+      });
+      embedding.mappedSectorIndices.forEach((sectorIndex) => add(result.sectors, sectorIndex, embeddingIndex));
     });
 
     touchIndex = result;

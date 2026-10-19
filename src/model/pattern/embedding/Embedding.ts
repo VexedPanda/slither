@@ -6,15 +6,37 @@ import { TPatternVertex } from '../pattern-board/TPatternVertex.ts';
 
 import assert, { assertEnabled } from '../../../workarounds/assert.ts';
 
+// The indices with values in a (possibly sparse) array, in ascending order
+const getDefinedIndices = (array: unknown[]): number[] => {
+  const indices: number[] = [];
+  array.forEach((value, index) => indices.push(index));
+  return indices;
+};
+
+// Null if the keys are in ascending order (see getDefinedIndices), otherwise an exact-size copy
+const getKeyOrder = (keys: number[]): number[] | null =>
+  keys.every((key, i) => i === 0 || keys[i - 1] < key) ? null : keys.slice();
+
 export class Embedding {
   public readonly isAutomorphism: boolean;
   public readonly isIdentityAutomorphism: boolean;
 
   // Target indices, indexed by source index. Faster than the maps for hot pattern matching.
-  public readonly mappedFaceIndices: number[] = [];
-  public readonly mappedNonExitEdgeIndices: number[] = [];
-  public readonly mappedExitEdgeIndices: number[][] = [];
-  public readonly mappedSectorIndices: number[] = [];
+  public readonly mappedVertexIndices: number[];
+  public readonly mappedFaceIndices: number[];
+  public readonly mappedNonExitEdgeIndices: number[];
+  public readonly mappedExitEdgeIndices: number[][];
+  public readonly mappedSectorIndices: number[];
+
+  // Source indices of each map's keys, in the original map order. A large board can have tens of thousands of
+  // embeddings (for every rule), so instead of keeping five Maps per embedding (most of their memory), the maps are
+  // rebuilt from these when requested.
+  // (null when they are in ascending order, which is common, so they can be found from the mapped indices instead)
+  private readonly vertexKeyOrder: number[] | null;
+  private readonly nonExitEdgeKeyOrder: number[] | null;
+  private readonly exitEdgeKeyOrder: number[] | null;
+  private readonly sectorKeyOrder: number[] | null;
+  private readonly faceKeyOrder: number[] | null;
 
   // Defined if it is an automorphism
   private readonly vertexInverseMap?: Map<TPatternVertex, TPatternVertex>;
@@ -26,26 +48,57 @@ export class Embedding {
     public readonly sourcePatternBoard: TPatternBoard,
     public readonly targetPatternBoard: TPatternBoard,
     // TODO: consider alternate implementation with fewer objects?
-    private readonly vertexMap: Map<TPatternVertex, TPatternVertex>,
-    private readonly nonExitEdgeMap: Map<TPatternEdge, TPatternEdge>,
-    private readonly exitEdgeMap: Map<TPatternEdge, TPatternEdge[]>,
-    private readonly sectorMap: Map<TPatternSector, TPatternSector>,
-    private readonly faceMap: Map<TPatternFace, TPatternFace>,
+    vertexMap: Map<TPatternVertex, TPatternVertex>,
+    nonExitEdgeMap: Map<TPatternEdge, TPatternEdge>,
+    exitEdgeMap: Map<TPatternEdge, TPatternEdge[]>,
+    sectorMap: Map<TPatternSector, TPatternSector>,
+    faceMap: Map<TPatternFace, TPatternFace>,
   ) {
     this.isAutomorphism = sourcePatternBoard === targetPatternBoard;
 
+    const vertexKeys: number[] = [];
+    const mappedVertexIndices: number[] = [];
+    for (const [vertex, mappedVertex] of vertexMap) {
+      vertexKeys.push(vertex.index);
+      mappedVertexIndices[vertex.index] = mappedVertex.index;
+    }
+    const faceKeys: number[] = [];
+    const mappedFaceIndices: number[] = [];
     for (const [face, mappedFace] of faceMap) {
-      this.mappedFaceIndices[face.index] = mappedFace.index;
+      faceKeys.push(face.index);
+      mappedFaceIndices[face.index] = mappedFace.index;
     }
+    const nonExitEdgeKeys: number[] = [];
+    const mappedNonExitEdgeIndices: number[] = [];
     for (const [edge, mappedEdge] of nonExitEdgeMap) {
-      this.mappedNonExitEdgeIndices[edge.index] = mappedEdge.index;
+      nonExitEdgeKeys.push(edge.index);
+      mappedNonExitEdgeIndices[edge.index] = mappedEdge.index;
     }
+    const exitEdgeKeys: number[] = [];
+    const mappedExitEdgeIndices: number[][] = [];
     for (const [edge, mappedEdges] of exitEdgeMap) {
-      this.mappedExitEdgeIndices[edge.index] = mappedEdges.map((mappedEdge) => mappedEdge.index);
+      exitEdgeKeys.push(edge.index);
+      mappedExitEdgeIndices[edge.index] = mappedEdges.map((mappedEdge) => mappedEdge.index);
     }
+    const sectorKeys: number[] = [];
+    const mappedSectorIndices: number[] = [];
     for (const [sector, mappedSector] of sectorMap) {
-      this.mappedSectorIndices[sector.index] = mappedSector.index;
+      sectorKeys.push(sector.index);
+      mappedSectorIndices[sector.index] = mappedSector.index;
     }
+
+    // Copied to exact-size arrays, since arrays grown an element at a time keep spare capacity (several times the
+    // size of these small arrays)
+    this.vertexKeyOrder = getKeyOrder(vertexKeys);
+    this.mappedVertexIndices = mappedVertexIndices.slice();
+    this.faceKeyOrder = getKeyOrder(faceKeys);
+    this.mappedFaceIndices = mappedFaceIndices.slice();
+    this.nonExitEdgeKeyOrder = getKeyOrder(nonExitEdgeKeys);
+    this.mappedNonExitEdgeIndices = mappedNonExitEdgeIndices.slice();
+    this.exitEdgeKeyOrder = getKeyOrder(exitEdgeKeys);
+    this.mappedExitEdgeIndices = mappedExitEdgeIndices.slice();
+    this.sectorKeyOrder = getKeyOrder(sectorKeys);
+    this.mappedSectorIndices = mappedSectorIndices.slice();
 
     if (this.isAutomorphism) {
       this.vertexInverseMap = new Map(Array.from(vertexMap).map(([key, value]) => [value, key]));
@@ -63,6 +116,26 @@ export class Embedding {
     }
 
     this.isIdentityAutomorphism = this.computeIsIdentityAutomorphism();
+  }
+
+  private get vertexKeys(): number[] {
+    return this.vertexKeyOrder ?? getDefinedIndices(this.mappedVertexIndices);
+  }
+
+  private get faceKeys(): number[] {
+    return this.faceKeyOrder ?? getDefinedIndices(this.mappedFaceIndices);
+  }
+
+  private get nonExitEdgeKeys(): number[] {
+    return this.nonExitEdgeKeyOrder ?? getDefinedIndices(this.mappedNonExitEdgeIndices);
+  }
+
+  private get exitEdgeKeys(): number[] {
+    return this.exitEdgeKeyOrder ?? getDefinedIndices(this.mappedExitEdgeIndices);
+  }
+
+  private get sectorKeys(): number[] {
+    return this.sectorKeyOrder ?? getDefinedIndices(this.mappedSectorIndices);
   }
 
   public static fromMaps(
@@ -86,59 +159,73 @@ export class Embedding {
     );
   }
 
+  // NOTE: the get*Map() methods build a new Map each call (see the keys above), so avoid them in hot code.
+
   public getVertexMap(): Map<TPatternVertex, TPatternVertex> {
-    return this.vertexMap;
+    return new Map(
+      this.vertexKeys.map((index) => [this.sourcePatternBoard.vertices[index], this.mapVertexIndex(index)]),
+    );
   }
 
   public getNonExitEdgeMap(): Map<TPatternEdge, TPatternEdge> {
-    return this.nonExitEdgeMap;
+    return new Map(
+      this.nonExitEdgeKeys.map((index) => [
+        this.sourcePatternBoard.edges[index],
+        this.targetPatternBoard.edges[this.mappedNonExitEdgeIndices[index]],
+      ]),
+    );
   }
 
   public getExitEdgeMap(): Map<TPatternEdge, TPatternEdge[]> {
-    return this.exitEdgeMap;
+    return new Map(
+      this.exitEdgeKeys.map((index) => [this.sourcePatternBoard.edges[index], this.mapExitEdgeIndex(index)]),
+    );
   }
 
   public getSectorMap(): Map<TPatternSector, TPatternSector> {
-    return this.sectorMap;
+    return new Map(
+      this.sectorKeys.map((index) => [
+        this.sourcePatternBoard.sectors[index],
+        this.targetPatternBoard.sectors[this.mappedSectorIndices[index]],
+      ]),
+    );
   }
 
   public getFaceMap(): Map<TPatternFace, TPatternFace> {
-    return this.faceMap;
+    return new Map(
+      this.faceKeys.map((index) => [
+        this.sourcePatternBoard.faces[index],
+        this.targetPatternBoard.faces[this.mappedFaceIndices[index]],
+      ]),
+    );
+  }
+
+  private mapVertexIndex(index: number): TPatternVertex {
+    return this.targetPatternBoard.vertices[this.mappedVertexIndices[index]];
+  }
+
+  private mapExitEdgeIndex(index: number): TPatternEdge[] {
+    return this.mappedExitEdgeIndices[index].map((mappedIndex) => this.targetPatternBoard.edges[mappedIndex]);
   }
 
   public mapVertex(vertex: TPatternVertex): TPatternVertex {
-    const result = this.vertexMap.get(vertex)!;
-    // assertEnabled() && assert(result);
-
-    return result;
+    return this.mapVertexIndex(vertex.index);
   }
 
   public mapNonExitEdge(edge: TPatternEdge): TPatternEdge {
-    const result = this.nonExitEdgeMap.get(edge)!;
-    // assertEnabled() && assert(result);
-
-    return result;
+    return this.targetPatternBoard.edges[this.mappedNonExitEdgeIndices[edge.index]];
   }
 
   public mapExitEdges(edge: TPatternEdge): TPatternEdge[] {
-    const result = this.exitEdgeMap.get(edge)!;
-    // assertEnabled() && assert(result);
-
-    return result;
+    return this.mapExitEdgeIndex(edge.index);
   }
 
   public mapSector(sector: TPatternSector): TPatternSector {
-    const result = this.sectorMap.get(sector)!;
-    // assertEnabled() && assert(result);
-
-    return result;
+    return this.targetPatternBoard.sectors[this.mappedSectorIndices[sector.index]];
   }
 
   public mapFace(face: TPatternFace): TPatternFace {
-    const result = this.faceMap.get(face)!;
-    // assertEnabled() && assert(result);
-
-    return result;
+    return this.targetPatternBoard.faces[this.mappedFaceIndices[face.index]];
   }
 
   public inverseMapVertex(vertex: TPatternVertex): TPatternVertex {
@@ -170,30 +257,47 @@ export class Embedding {
   }
 
   public equals(embedding: Embedding): boolean {
+    const sameMapping = (keys: number[], otherKeys: number[], mapped: number[], otherMapped: number[]) =>
+      keys.length === otherKeys.length &&
+      otherKeys.every((index) => index in mapped) &&
+      keys.every((index) => index in otherMapped && mapped[index] === otherMapped[index]);
+
     return (
-      this.vertexMap.size === embedding.vertexMap.size &&
-      this.nonExitEdgeMap.size === embedding.nonExitEdgeMap.size &&
-      this.exitEdgeMap.size === embedding.exitEdgeMap.size &&
-      this.sectorMap.size === embedding.sectorMap.size &&
-      this.faceMap.size === embedding.faceMap.size &&
-      Array.from(this.vertexMap).every(([vertex, mappedVertex]) => embedding.vertexMap.get(vertex) === mappedVertex) &&
-      Array.from(this.nonExitEdgeMap).every(
-        ([edge, mappedEdge]) => embedding.nonExitEdgeMap.get(edge) === mappedEdge,
+      sameMapping(this.vertexKeys, embedding.vertexKeys, this.mappedVertexIndices, embedding.mappedVertexIndices) &&
+      sameMapping(
+        this.nonExitEdgeKeys,
+        embedding.nonExitEdgeKeys,
+        this.mappedNonExitEdgeIndices,
+        embedding.mappedNonExitEdgeIndices,
       ) &&
-      Array.from(this.exitEdgeMap).every(([edge, mappedEdges]) => embedding.exitEdgeMap.get(edge) === mappedEdges) &&
-      Array.from(this.sectorMap).every(([sector, mappedSector]) => embedding.sectorMap.get(sector) === mappedSector) &&
-      Array.from(this.faceMap).every(([face, mappedFace]) => embedding.faceMap.get(face) === mappedFace)
+      this.exitEdgeKeys.length === embedding.exitEdgeKeys.length &&
+      this.exitEdgeKeys.every((index) => {
+        const mappedEdges = this.mappedExitEdgeIndices[index];
+        const otherMappedEdges = embedding.mappedExitEdgeIndices[index];
+        return (
+          !!otherMappedEdges &&
+          mappedEdges.length === otherMappedEdges.length &&
+          mappedEdges.every((edgeIndex, i) => edgeIndex === otherMappedEdges[i])
+        );
+      }) &&
+      sameMapping(this.sectorKeys, embedding.sectorKeys, this.mappedSectorIndices, embedding.mappedSectorIndices) &&
+      sameMapping(this.faceKeys, embedding.faceKeys, this.mappedFaceIndices, embedding.mappedFaceIndices)
     );
   }
 
   public toString(): string {
+    const vertexMap = this.getVertexMap();
+    const nonExitEdgeMap = this.getNonExitEdgeMap();
+    const exitEdgeMap = this.getExitEdgeMap();
+    const sectorMap = this.getSectorMap();
+    const faceMap = this.getFaceMap();
     return (
       `Embedding(\n` +
-      `  vertexMap: ${[...this.vertexMap].map((pair) => `${pair[0].index} ${pair[0].isExit ? '->' : '=>'} ${pair[1].index}`).join(', ')}\n` +
-      `  nonExitEdgeMap: ${[...this.nonExitEdgeMap].map((pair) => `${pair[0].index} => ${pair[1].index}`).join(', ')}\n` +
-      `  exitEdgeMap: ${[...this.exitEdgeMap].map((pair) => `${pair[0].index} => [${pair[1].map((edge) => edge.index).join(', ')}]`).join(', ')}\n` +
-      `  sectorMap: ${[...this.sectorMap].map((pair) => `${pair[0].index} => ${pair[1].index}`).join(', ')}\n` +
-      `  faceMap: ${[...this.faceMap].map((pair) => `${pair[0].index} ${pair[0].isExit ? '->' : '=>'} ${pair[1].index}`).join(', ')}\n` +
+      `  vertexMap: ${[...vertexMap].map((pair) => `${pair[0].index} ${pair[0].isExit ? '->' : '=>'} ${pair[1].index}`).join(', ')}\n` +
+      `  nonExitEdgeMap: ${[...nonExitEdgeMap].map((pair) => `${pair[0].index} => ${pair[1].index}`).join(', ')}\n` +
+      `  exitEdgeMap: ${[...exitEdgeMap].map((pair) => `${pair[0].index} => [${pair[1].map((edge) => edge.index).join(', ')}]`).join(', ')}\n` +
+      `  sectorMap: ${[...sectorMap].map((pair) => `${pair[0].index} => ${pair[1].index}`).join(', ')}\n` +
+      `  faceMap: ${[...faceMap].map((pair) => `${pair[0].index} ${pair[0].isExit ? '->' : '=>'} ${pair[1].index}`).join(', ')}\n` +
       `)`
     );
   }
@@ -203,66 +307,44 @@ export class Embedding {
       return false;
     }
 
-    for (const vertex of this.vertexMap.keys()) {
-      if (this.vertexMap.get(vertex) !== vertex) {
-        return false;
-      }
-    }
-
-    for (const edge of this.nonExitEdgeMap.keys()) {
-      if (this.nonExitEdgeMap.get(edge) !== edge) {
-        return false;
-      }
-    }
-
-    for (const edge of this.exitEdgeMap.keys()) {
-      if (this.exitEdgeMap.get(edge)!.length !== 1 || this.exitEdgeMap.get(edge)![0] !== edge) {
-        return false;
-      }
-    }
-
-    for (const sector of this.sectorMap.keys()) {
-      if (this.sectorMap.get(sector) !== sector) {
-        return false;
-      }
-    }
-
-    for (const face of this.faceMap.keys()) {
-      if (this.faceMap.get(face) !== face) {
-        return false;
-      }
-    }
-
-    return true;
+    return (
+      this.vertexKeys.every((index) => this.mappedVertexIndices[index] === index) &&
+      this.nonExitEdgeKeys.every((index) => this.mappedNonExitEdgeIndices[index] === index) &&
+      this.exitEdgeKeys.every(
+        (index) => this.mappedExitEdgeIndices[index].length === 1 && this.mappedExitEdgeIndices[index][0] === index,
+      ) &&
+      this.sectorKeys.every((index) => this.mappedSectorIndices[index] === index) &&
+      this.faceKeys.every((index) => this.mappedFaceIndices[index] === index)
+    );
   }
 
   public serialize(): SerializedEmbedding {
     return {
       vertexMapping: this.sourcePatternBoard.vertices.map((vertex) => {
-        assertEnabled() && assert(this.vertexMap.has(vertex));
+        assertEnabled() && assert(vertex.index in this.mappedVertexIndices);
 
-        return this.vertexMap.get(vertex)!.index;
+        return this.mappedVertexIndices[vertex.index];
       }),
       edgeMapping: this.sourcePatternBoard.edges.map((edge) => {
         if (edge.isExit) {
-          assertEnabled() && assert(this.exitEdgeMap.has(edge));
+          assertEnabled() && assert(edge.index in this.mappedExitEdgeIndices);
 
-          return this.exitEdgeMap.get(edge)!.map((edge) => edge.index);
+          return [...this.mappedExitEdgeIndices[edge.index]];
         } else {
-          assertEnabled() && assert(this.nonExitEdgeMap.has(edge));
+          assertEnabled() && assert(edge.index in this.mappedNonExitEdgeIndices);
 
-          return this.nonExitEdgeMap.get(edge)!.index;
+          return this.mappedNonExitEdgeIndices[edge.index];
         }
       }),
       sectorMapping: this.sourcePatternBoard.sectors.map((sector) => {
-        assertEnabled() && assert(this.sectorMap.has(sector));
+        assertEnabled() && assert(sector.index in this.mappedSectorIndices);
 
-        return this.sectorMap.get(sector)!.index;
+        return this.mappedSectorIndices[sector.index];
       }),
       faceMapping: this.sourcePatternBoard.faces.map((face) => {
-        assertEnabled() && assert(this.faceMap.has(face));
+        assertEnabled() && assert(face.index in this.mappedFaceIndices);
 
-        return this.faceMap.get(face)!.index;
+        return this.mappedFaceIndices[face.index];
       }),
     };
   }
