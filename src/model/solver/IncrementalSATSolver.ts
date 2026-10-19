@@ -34,6 +34,8 @@ class IncrementalSATSolver {
   private readonly variableNameToEdge = new Map<string, TEdge>();
   private readonly faceSelectors = new Map<string, number>(); // `${faceIndex},${value}` => selector variable number
   private callCount = 0;
+  // Every clause added (including logic-solver's two initial ones), even after they are dropped from solver.clauses
+  private addedClauseCount = this.solver.clauses.length;
 
   public constructor(private readonly board: TBoard) {
     // Same variable names (and order) as satSolve
@@ -59,7 +61,7 @@ class IncrementalSATSolver {
   }
 
   public get clauseCount(): number {
-    return this.solver.clauses.length;
+    return this.addedClauseCount;
   }
 
   private term(edge: TEdge): number {
@@ -67,6 +69,7 @@ class IncrementalSATSolver {
   }
 
   private addClause(terms: number[]): void {
+    this.addedClauseCount++;
     this.solver._addClause(new Logic.Clause(terms));
   }
 
@@ -76,6 +79,15 @@ class IncrementalSATSolver {
         callback(combination);
       }
     });
+  }
+
+  // logic-solver keeps every clause (to give them to MiniSat when solving), which on large boards is hundreds of MB of
+  // long loop-excluding clauses. Once MiniSat has them, they aren't needed (we don't use logic-solver's formulas).
+  private dropClausesGivenToMiniSat(): void {
+    if (this.solver._numClausesAddedToMiniSat === this.solver.clauses.length) {
+      this.solver.clauses.length = 0;
+      this.solver._numClausesAddedToMiniSat = 0;
+    }
   }
 
   // A variable that (when true) requires exactly `value` of the face's edges
@@ -124,6 +136,7 @@ class IncrementalSATSolver {
       const getBlackEdges = (): TEdge[] | null => {
         const solution = this.solver.solve(callVariable);
         hasSolved = true;
+        this.dropClausesGivenToMiniSat();
 
         if (solution) {
           const edges: TEdge[] = [];
