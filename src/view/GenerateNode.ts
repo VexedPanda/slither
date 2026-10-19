@@ -166,6 +166,12 @@ export class GenerateNode extends HBox {
     // Whether the Generate button's own generation (or wait for a background one) is in progress
     const foregroundGeneratingProperty = new TinyProperty(false);
 
+    // Whether the Generate button's last generation (with the current settings) failed, so it can be retried
+    const foregroundFailedProperty = new TinyProperty(false);
+    currentKeyProperty.lazyLink(() => {
+      foregroundFailedProperty.value = false;
+    });
+
     // Whether a puzzle with the current settings is ready, or being generated in the background
     const matchingPreGenerationProperty = new DerivedProperty(
       [currentKeyProperty, preGeneratedKeyProperty, preGeneratedPuzzleReadyProperty, preGeneratingPuzzleProperty],
@@ -177,10 +183,14 @@ export class GenerateNode extends HBox {
         : null,
     );
 
-    // Disabled while generating, and "Start" when a puzzle with the current settings is ready
+    // Disabled while generating, "Start" when a puzzle with the current settings is ready, and "Retry" after a failure
     const generateButtonTextProperty = new DerivedProperty(
-      [matchingPreGenerationProperty, foregroundGeneratingProperty],
-      (matching, foregroundGenerating) => (matching === 'ready' && !foregroundGenerating ? 'Start' : 'Generate'),
+      [matchingPreGenerationProperty, foregroundGeneratingProperty, foregroundFailedProperty],
+      (matching, foregroundGenerating, foregroundFailed) =>
+        foregroundGenerating ? 'Generate'
+        : matching === 'ready' ? 'Start'
+        : foregroundFailed ? 'Failed, Retry'
+        : 'Generate',
     );
     const generateButtonEnabledProperty = new DerivedProperty(
       [matchingPreGenerationProperty, foregroundGeneratingProperty],
@@ -397,6 +407,7 @@ export class GenerateNode extends HBox {
             interruptGenerateEmitter.emit();
 
             foregroundGeneratingProperty.value = true;
+            foregroundFailedProperty.value = false;
             try {
               await generate();
             } finally {
@@ -479,6 +490,10 @@ export class GenerateNode extends HBox {
         if (minimizedPuzzle) {
           previewGeneratedNode.children = [];
           loadGeneratedPuzzle(minimizedPuzzle);
+        } else if (!interruptedProperty.value) {
+          // The generation failed (not interrupted), so don't leave its partial progress up as if it were still going
+          previewGeneratedNode.children = [];
+          foregroundFailedProperty.value = true;
         }
 
         if (interruptGenerateEmitter.hasListener(interruptListener)) {
