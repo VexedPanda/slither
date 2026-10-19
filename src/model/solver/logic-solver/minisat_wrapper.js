@@ -50,9 +50,6 @@ MiniSat = function () {
   };
 
   C._createTheSolver();
-
-  // useful log for debugging and testing
-  this._clauses = [];
 };
 
 // Make sure MiniSat has allocated space in its model for v,
@@ -69,7 +66,6 @@ MiniSat.prototype.ensureVar = function (v) {
 // (as far as we know without doing more work), and false if
 // we can already tell that it is unsatisfiable.
 MiniSat.prototype.addClause = function (terms) {
-  this._clauses.push(terms);
   return this._native.savingStack(function (native, C) {
     var termsPtr = C.allocate((terms.length + 1) * 4, 'i32', C.ALLOC_STACK);
     _.each(terms, function (t, i) {
