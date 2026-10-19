@@ -1,7 +1,8 @@
 #!/bin/bash -e
 
 # Builds minisat.js (MiniSat compiled to WebAssembly, embedded in the JS) from the meteor/minisat repo, which is the
-# source of the original asm.js build used by logic-solver.
+# source of the original asm.js build used by logic-solver, with our logic-solver.cc (based on meteor/logic-solver.cc)
+# in place of the repo's.
 #
 # MiniSat is MIT licensed (see LICENSE-minisat), as is logic-solver (see LICENSE).
 #
@@ -28,15 +29,15 @@ em++ --version | head -1
 
 # - WASM_ASYNC_COMPILATION=0 with MODULARIZE: C_MINISAT() creates a new instance synchronously (as logic-solver needs).
 # - SINGLE_FILE: the wasm is embedded, so bundlers and workers need nothing extra.
-# - Each solver gets its own instance (MiniSat is a bit leaky, see the meteor/minisat README), which is freed with it.
+# - Solvers share one instance per JS context (see logic-solver.cc and minisat_wrapper.js).
 em++ -O3 -I. -D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -Wno-reserved-user-defined-literal \
-  meteor/logic-solver.cc minisat/core/Solver.cc minisat/simp/SimpSolver.cc minisat/utils/Options.cc \
+  "$OUT_DIR/logic-solver.cc" minisat/core/Solver.cc minisat/simp/SimpSolver.cc minisat/utils/Options.cc \
   minisat/utils/System.cc \
   -sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sINITIAL_MEMORY=4MB -sSTACK_SIZE=1MB \
   -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=C_MINISAT -sWASM_ASYNC_COMPILATION=0 -sSINGLE_FILE=1 \
   -sENVIRONMENT=web,worker -sFILESYSTEM=0 -sASSERTIONS=0 -sINCOMING_MODULE_JS_API=[] \
-  -sEXPORTED_FUNCTIONS=_createTheSolver,_ensureVar,_addClause,_solve,_getSolution,_getNumVars,_solveAssuming,_retireVar,_getConflictClauseSize,_getConflictClause \
-  -sEXPORTED_RUNTIME_METHODS=stackSave,stackRestore,stackAlloc,setValue,getValue \
+  -sEXPORTED_FUNCTIONS=_createSolver,_deleteSolver,_ensureVar,_addClause,_solve,_getSolution,_getNumVars,_solveAssuming,_retireVar,_getConflictClauseSize,_getConflictClause \
+  -sEXPORTED_RUNTIME_METHODS=stackSave,stackRestore,stackAlloc,setValue,getValue,HEAPU8 \
   -o "$OUT_DIR/minisat.js"
 
 sed -i.bak '1i\

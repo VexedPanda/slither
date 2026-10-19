@@ -92,10 +92,17 @@ export const satSolve = (
   options: SatSolveOptions,
 ): TEdge[][] => {
   // Logic-solver's argument checks are a large part of clause generation time, and our inputs are generated
-  return Logic.disablingAssertions(() => satSolveWithoutAssertions(board, state, options));
+  // Disposed when done, rather than waiting for garbage collection to free its native memory
+  const solver = new Logic.Solver();
+  try {
+    return Logic.disablingAssertions(() => satSolveWithoutAssertions(solver, board, state, options));
+  } finally {
+    solver.dispose();
+  }
 };
 
 const satSolveWithoutAssertions = (
+  solver: Logic.Solver,
   board: TBoard,
   state: TState<TEdgeStateData & TFaceValueData>,
   options: SatSolveOptions,
@@ -116,8 +123,6 @@ const satSolveWithoutAssertions = (
 
   const edgeToVariable = new Map(whiteEdges.map((edge, i) => [edge, `edge${i + 1}`]));
   const variableToEdge = new Map(whiteEdges.map((edge, i) => [`edge${i + 1}`, edge]));
-
-  const solver = new Logic.Solver();
 
   // Every constraint below is a plain clause, so we add numeric clauses directly. Going through Logic.or() etc. was
   // most of the solve time (formula objects, flattening, and parsing variable names for every term).

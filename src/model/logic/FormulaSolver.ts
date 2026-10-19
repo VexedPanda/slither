@@ -78,4 +78,9 @@ export class FormulaSolver<T> {
       return null;
     }
   }
+
+  // Frees the native solver now, instead of when this is garbage collected. It can't be used afterward.
+  public dispose(): void {
+    this.solver.dispose();
+  }
 }

@@ -60,6 +60,10 @@ class IncrementalSATSolver {
     }
   }
 
+  public dispose(): void {
+    this.solver.dispose();
+  }
+
   public get clauseCount(): number {
     return this.addedClauseCount;
   }
@@ -257,6 +261,7 @@ export const incrementalSatSolve = (
   return Logic.disablingAssertions(() => {
     let solver = solverMap.get(board);
     if (!solver || solver.clauseCount > MAX_CLAUSES) {
+      solver?.dispose();
       solver = new IncrementalSATSolver(board);
       solverMap.set(board, solver);
     }
@@ -271,6 +276,7 @@ export const incrementalSatSolve = (
       // e.g. MiniSat aborted (such as running out of memory), which leaves the solver unusable. Retry once with a new
       // solver, which doesn't have the retired clauses.
       console.warn('Incremental SAT solve failed, retrying with a new solver', e);
+      solver.dispose();
       solver = new IncrementalSATSolver(board);
       solverMap.set(board, solver);
       return solver.solve(state, options);
