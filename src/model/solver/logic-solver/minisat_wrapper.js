@@ -24,20 +24,26 @@ MiniSat = function () {
   //
   // See the README in the meteor/minisat repo for more notes about
   // our build of MiniSat.
-  var C = (this._C = C_MINISAT());
+  //
+  // minisat.js is now a WebAssembly build (see build-minisat.sh). Its factory is async, but since it is built to
+  // compile and instantiate synchronously, the module object we pass in is ready as soon as the call returns.
+  var C = (this._C = {});
+  C_MINISAT(C).catch(function () {
+    // Failures are detected (and thrown) below
+  });
+  if (!C._createTheSolver) {
+    throw new Error('MiniSat failed to initialize');
+  }
 
   this._native = {
     getStackPointer: function () {
-      return C.Runtime.stackSave();
+      return C.stackSave();
     },
     setStackPointer: function (ptr) {
-      C.Runtime.stackRestore(ptr);
+      C.stackRestore(ptr);
     },
     allocateBytes: function (len) {
-      return C.allocate(len, 'i8', C.ALLOC_STACK);
-    },
-    pushString: function (str) {
-      return this.allocateBytes(C.intArrayFromString(str));
+      return C.stackAlloc(len);
     },
     savingStack: function (func) {
       var SP = this.getStackPointer();
@@ -67,7 +73,7 @@ MiniSat.prototype.ensureVar = function (v) {
 // we can already tell that it is unsatisfiable.
 MiniSat.prototype.addClause = function (terms) {
   return this._native.savingStack(function (native, C) {
-    var termsPtr = C.allocate((terms.length + 1) * 4, 'i32', C.ALLOC_STACK);
+    var termsPtr = C.stackAlloc((terms.length + 1) * 4);
     _.each(terms, function (t, i) {
       C.setValue(termsPtr + i * 4, t, 'i32');
     });
