@@ -49,29 +49,48 @@ export class PatternBoardSolver {
     return result;
   }
 
+  // Frees the native solver now, instead of when this is garbage collected. It can't be used afterward.
+  public dispose(): void {
+    this.solver.dispose();
+  }
+
+  // Runs with a solver for the features, disposing it afterward
+  private static withSolver<T>(
+    patternBoard: TPatternBoard,
+    features: TFeature[],
+    callback: (solver: PatternBoardSolver) => T,
+  ): T {
+    const solver = new PatternBoardSolver(patternBoard);
+    try {
+      for (const feature of features) {
+        solver.addFeature(feature);
+      }
+
+      return callback(solver);
+    } finally {
+      solver.dispose();
+    }
+  }
+
   public static forEachSolution(
     patternBoard: TPatternBoard,
     features: TFeature[],
     callback: (solution: TPatternEdge[]) => void,
   ): void {
-    const solver = new PatternBoardSolver(patternBoard);
+    PatternBoardSolver.withSolver(patternBoard, features, (solver) => {
+      while (true) {
+        // TODO: figure out if we should expose this for debugging (helps)
+        // console.log( solver.solver.solver._clauseStrings() );
 
-    for (const feature of features) {
-      solver.addFeature(feature);
-    }
+        const solution = solver.getNextSolution();
 
-    while (true) {
-      // TODO: figure out if we should expose this for debugging (helps)
-      // console.log( solver.solver.solver._clauseStrings() );
-
-      const solution = solver.getNextSolution();
-
-      if (solution) {
-        callback(solution);
-      } else {
-        break;
+        if (solution) {
+          callback(solution);
+        } else {
+          break;
+        }
       }
-    }
+    });
   }
 
   public static countSolutions(patternBoard: TPatternBoard, features: TFeature[]): number {
@@ -85,22 +104,10 @@ export class PatternBoardSolver {
   }
 
   public static getSolutions(patternBoard: TPatternBoard, features: TFeature[]): TPatternEdge[][] {
-    const solver = new PatternBoardSolver(patternBoard);
-
-    for (const feature of features) {
-      solver.addFeature(feature);
-    }
-
-    return solver.getRemainingSolutions();
+    return PatternBoardSolver.withSolver(patternBoard, features, (solver) => solver.getRemainingSolutions());
   }
 
   public static hasSolution(patternBoard: TPatternBoard, features: TFeature[]): boolean {
-    const solver = new PatternBoardSolver(patternBoard);
-
-    for (const feature of features) {
-      solver.addFeature(feature);
-    }
-
-    return solver.getNextSolution() !== null;
+    return PatternBoardSolver.withSolver(patternBoard, features, (solver) => solver.getNextSolution() !== null);
   }
 }

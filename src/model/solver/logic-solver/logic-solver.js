@@ -1573,6 +1573,11 @@ Logic.sum = function (/*formulaOrBitsOrArray, ...*/) {
 
 ////////////////////////////////////////
 
+// Frees the native solver now, instead of when this is garbage collected. It can't be used afterward.
+Logic.Solver.prototype.dispose = function () {
+  this._minisat.dispose();
+};
+
 Logic.Solver.prototype.solve = function (_assumpVar) {
   var self = this;
   if (_assumpVar !== undefined) {
